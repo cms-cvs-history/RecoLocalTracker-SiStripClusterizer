@@ -1,0 +1,12 @@
+To get the test using the parameter-set DigisToClusters.txt to work, 
+the user has to provide an input file containing StripDigis. 
+
+The user can follow the instructions on
+
+http://home.fnal.gov/~gutsche/software/new_edm/new_edm.html
+
+to convert the needed information from ORCA or download the following file:
+
+wget -O DigisToDigis.root http://home.fnal.gov/~gutsche/software/new_edm/DigisToDigis-<release>.root
+
+where <release> has to be substitutet with pre8, pre9, etc.
