@@ -1,12 +1,38 @@
-To get the test using the parameter-set DigisToClusters.txt to work, 
-the user has to provide an input file containing StripDigis. 
+parameter-set DigisToClusters.txt:
+----------------------------------
 
-The user can follow the instructions on
+download input ROOT file
 
-http://home.fnal.gov/~gutsche/software/new_edm/new_edm.html
+http://home.fnal.gov/~gutsche/software/new_edm/DigisToDigis-<release>.root
 
-to convert the needed information from ORCA or download the following file:
+and rename it to
 
-wget -O DigisToDigis.root http://home.fnal.gov/~gutsche/software/new_edm/DigisToDigis-<release>.root
+DigisToDigis.root
 
-where <release> has to be substitutet with pre8, pre9, etc.
+and use the parameter-set DigisToClusters.txt with cmsRun to cluster Digis
+
+parameter-set ClustersTo1DLocal.txt:
+------------------------------------
+
+use parameter-set DigisToClusters.txt or download input ROOT file 
+
+http://home.fnal.gov/~gutsche/software/new_edm/DigisToClusters-<release>.root
+
+and rename it to
+
+DigisToClusters.root
+
+and use the parameter-set ClustersTo1DLocal.txt to convert Clusters into 1D local measurements
+
+parameter-set DigisTo1DLocal.txt:
+---------------------------------
+
+download input ROOT file
+
+http://home.fnal.gov/~gutsche/software/new_edm/DigisToDigis-<release>.root
+
+and rename it to
+
+DigisToDigis.root
+
+and use the parameter-set DigisTo11DLocal.txt with cmsRun to cluster Digis and convert Clusters into 1D local measurements
