@@ -3,7 +3,7 @@ module ThreeThresholdClusterizer =  SiStripClusterizer {
 	string DigiProducer        = "stripdigi"
 	untracked string userEnv   = "me"
 	untracked string passwdEnv = "me"
-   bool UseNoiseBadStripFlagFromDB = false
+           bool UseCalibDataFromDB = false
 
 	string ClusterMode         = "ThreeThresholdClusterizer"
 	double ChannelThreshold    = 2.0
