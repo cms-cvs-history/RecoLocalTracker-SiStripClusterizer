@@ -11,6 +11,7 @@ namespace cms{
   TestCluster::~TestCluster(){};
   
   void TestCluster::beginJob( const edm::EventSetup& es ) {
+    char name[128];
     
     SiStripNoiseService_.configure(es);
     SiStripPedestalsService_.configure(es);
@@ -25,7 +26,6 @@ namespace cms{
     edm::ParameterSet Parameters;
     for(TrackerGeometry::DetContainer::const_iterator it = tkgeom->dets().begin(); it != tkgeom->dets().end(); it++){           
       uint32_t detid=((*it)->geographicalId()).rawId();       
-      char name[128];
       
       const StripGeomDetUnit* _StripGeomDetUnit = dynamic_cast<const StripGeomDetUnit*>(tkgeom->idToDetUnit(DetId(detid)));
       if (_StripGeomDetUnit==0){
@@ -67,14 +67,35 @@ namespace cms{
 					      );
     }
 
-    Parameters =  conf_.getParameter<edm::ParameterSet>("TH1Noises");
-    _TH1F_Noises =  new TH1F("Noises","Noises",
-			     Parameters.getParameter<int32_t>("Nbinx"),
-			     Parameters.getParameter<double>("xmin"),
-			     Parameters.getParameter<double>("xmax")
-			     );
+    std::string SubDet[3]={"TIB","TOB","TEC"};
+    for (int i=0;i<3;i++){
+      sprintf(name,"ClusterSignal_Cumulative_%s",SubDet[i].c_str());
+      Parameters =  conf_.getParameter<edm::ParameterSet>("TH1ClusterSignal");
+      _TH1F_ClusterSignal_v.push_back(new TH1F(name,name,
+					Parameters.getParameter<int32_t>("Nbinx"),
+					Parameters.getParameter<double>("xmin"),
+					Parameters.getParameter<double>("xmax")
+					)
+			       );
+      sprintf(name,"ClusterStoN_Cumulative_%s",SubDet[i].c_str());
+      Parameters =  conf_.getParameter<edm::ParameterSet>("TH1ClusterStoN");
+      _TH1F_ClusterStoN_v.push_back(new TH1F(name,name,
+					     Parameters.getParameter<int32_t>("Nbinx"),
+					     Parameters.getParameter<double>("xmin"),
+					     Parameters.getParameter<double>("xmax")
+					     )
+				    );
+      sprintf(name,"Noises_Cumulative_%s",SubDet[i].c_str());
+      Parameters =  conf_.getParameter<edm::ParameterSet>("TH1Noises");
+      _TH1F_Noises_v.push_back(new TH1F(name,name,
+					Parameters.getParameter<int32_t>("Nbinx"),
+					Parameters.getParameter<double>("xmin"),
+					Parameters.getParameter<double>("xmax")
+					)
+			       );
+    }
   }
-  
+
   void TestCluster::endJob() {  
     edm::LogInfo("TestCluster") << "[TestCluster::endJob] >>> ending histograms" << std::endl;
 
@@ -107,7 +128,8 @@ namespace cms{
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill Noise detid " << detid << " strip " << istrip;
 	  _TH1F_NoisesProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getNoise(detid,istrip));
 	  
-	  _TH1F_Noises->Fill(SiStripNoiseService_.getNoise(detid,istrip));
+	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
+	  _TH1F_Noises_v[iSubDet]->Fill(SiStripNoiseService_.getNoise(detid,istrip));
 	  //check
 	  if (SiStripNoiseService_.getNoise(detid,istrip) != SiStripPedestalsService_.getNoise(detid,istrip)) {
 	    edm::LogError("TestCluster") << "[TestCluster::endJob]  ERROR for detid " 
@@ -181,25 +203,34 @@ namespace cms{
     edm::DetSetVector<SiStripCluster>::const_iterator DSViter=input->begin();
     for (; DSViter!=input->end();DSViter++){
       uint32_t detid = DSViter->id;
+      const StripGeomDetUnit*_StripGeomDetUnit = dynamic_cast<const StripGeomDetUnit*>(tkgeom->idToDetUnit(DetId(detid)));
       
-      float clusiz=0;
-      float Signal=0;
-      float StoN=0;
-      
+      float clusiz=0;      
       //Loop on Clusters
       for(edm::DetSet<SiStripCluster>::const_iterator ic = DSViter->data.begin(); ic!=DSViter->data.end(); ic++) {
 
 	clusiz = ic->amplitudes().size();
 	int barycenter=((int)ic->barycenter())%128;
-	if ( barycenter>3 && barycenter<125){
+	float Signal=0;
+	float noise2=0;
+	int count=0;
+	
+	//	if ( barycenter>3 && barycenter<125)
+	{
 	  const std::vector<short> amplitudes=ic->amplitudes();
-	  for(size_t i=0; i<amplitudes.size();i++){
-	    Signal+=amplitudes[i];
-	    StoN+=amplitudes[i]/SiStripNoiseService_.getNoise(detid,i);
-	  }
+	  for(size_t i=0; i<amplitudes.size();i++)
+	    if (amplitudes[i]>0){
+	      Signal+=amplitudes[i];
+	      noise2+=SiStripNoiseService_.getNoise(detid,ic->firstStrip()+i)*SiStripNoiseService_.getNoise(detid,ic->firstStrip()+i);
+	      count++;
+	    }
 	  //Fill Histos
 	  _TH1F_ClusterSignal_m.find(detid)->second->Fill(Signal);
-	  _TH1F_ClusterStoN_m.find(detid)->second->Fill(StoN);
+	  _TH1F_ClusterStoN_m.find(detid)->second->Fill(Signal/sqrt(noise2/count));
+	  
+	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
+	  _TH1F_ClusterSignal_v[iSubDet]->Fill(Signal);
+	  _TH1F_ClusterStoN_v[iSubDet]->Fill(Signal/sqrt(noise2/count));
 	}
       }
     }

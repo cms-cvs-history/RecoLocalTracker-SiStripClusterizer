@@ -7,10 +7,13 @@ function unpack(){
 	do
 	echo $file
 	runNum=`echo $file | sed -e "s#[^0-9]##g"`
-	tar xvzf $file \*RU\*root
-	mv ${runNum}/* $runs_path
-	rm -rf ${runNum}
-	ls 
+	if [ ! -e ${runs_path}/RU[0*]${runNum}*root ];
+	    then
+	    echo extracting file
+	    tar xvzf $file \*RU\*root
+	    mv ${runNum}/* $runs_path
+	    rm -rf ${runNum}
+	fi
     done
     cd -
 
@@ -32,7 +35,6 @@ function runPedestals(){
     i=0
     while [ $i -lt $Ndim ]
       do
-      echo ${pedRuns[$i]} " " ${iov[$i]}
 
       #Create input file list
       firstRun=`echo ${pedRuns[$i]} | awk -F":" '{print $1}'`
@@ -47,16 +49,15 @@ function runPedestals(){
 	let firstRun++
       done
       inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
-      echo $inputfilenames
 
       #get iov
       iovfirstRun=`echo ${iov[$i]} | awk -F":" '{print $1}'`
-      iovlastRun=`echo ${iov[$i]} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
 
-      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@" | sed -e "s@insert_iovlastRun@${iovlastRun}@" > $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${pedRuns[$i]}@g"> $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
 
-
+      echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
       cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
       exit_status=$?
       
@@ -77,29 +78,55 @@ function runPedestals(){
 
 function runPhysics(){
     echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning Analysis on Physics Runs on files\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
-
-    fedconnections=$1
-    firstRun=$2
-    lastRun=$3
-
-    inputfilenames=""
-    while [ ${firstRun} -le ${lastRun} ]
+    
+    grep -v "\#" $output_path/PhysicsRuns_List.dat 
+    
+    fedconnections=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $1}'`)
+    Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
+    
+    Ndim=${#Runs[@]}
+    
+    #loop on entries
+    i=0
+    while [ $i -lt $Ndim ]
       do
-      for file in `ls ${runs_path}/*${firstRun}*root`
+      
+      #Create input file list
+      firstRun=`echo ${Runs[$i]} | awk -F":" '{print $1}'`
+      lastRun=`echo ${Runs[$i]} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
+      inputfilenames=""
+      while [ ${firstRun} -le ${lastRun} ]
 	do
-	inputfilenames="${inputfilenames},\"file:$file\""
+	for file in `ls ${runs_path}/*${firstRun}*root`
+	  do
+	  inputfilenames="${inputfilenames},\"file:$file\""
+	done
+	let firstRun++
       done
-      let firstRun++
-    done
-    inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
-    echo $inputfilenames
+      inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
+      echo $inputfilenames
+      
+      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
 
-    cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_outputfilename@${outputfilename}@" > $cfg_path/mtcc_physics_${firstRun}_${lastRun}.cfg
-
-      echo cmsRun $cfg_path/mtcc_physics_${firstRun}_${lastRun}.cfg
-#      cmsRun $cfg_path/mtcc_physics_${firstRun}_${lastRun}.cfg
+      echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+      echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+      cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
       exit_status=$?
 
+      if [ "$exit_status" == "0" ];
+	  then
+	  cat $output_path/PhysicsRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${Runs[$i]})@#&@g" >> file.tmp
+	  mv -f file.tmp $output_path/PhysicsRuns_List.dat
+      else
+	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running Physics on cfg "
+	  cat $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+	  echo -e "\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
+
+      fi
+
+      let i++
+    done
 }
 
 #MAIN
@@ -111,7 +138,9 @@ export tar_path=/data/mtcc/tars
 export runs_path=/data/mtcc/runs
 export pedestals_path=/data/mtcc/pedestals
 export cfg_path=/data/mtcc/cfg
+export log_path=/data/mtcc/logs
 export fedconnections_path=/data/mtcc/fedconnections
+export output_path=/data/mtcc/output
 export CMSSW_path=/localscratch/g/giordano/CMSSW/Development/MTCC/CMSSW_0_6_0_pre6/src
 
 cd $CMSSW_path
@@ -129,8 +158,10 @@ case "$step" in
 	;;
 "runPhysics")
 #run pedestals
-	runPhysics $2 $3 $4
+	runPhysics 
 	;;
 	*)
-	echo "please explicit a starting step"
+	echo "please explicit an analysis step: unpack, runPedestals, runPhysics"
+	;;
 esac
+
