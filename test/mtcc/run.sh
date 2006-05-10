@@ -129,6 +129,25 @@ function runPhysics(){
     done
 }
 
+function runTestCluster(){
+    echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning TestCluster\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
+
+    Run=$1
+    file=$output_path/${Run}.root
+
+#Create input file list
+    inputfilenames="\"file:${file}\""
+    echo $inputfilenames
+      
+    cat $cfg_path/template_mtcc_TestCluster.cfg | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@TestCluster_${Run}@g" | sed -e "s@insert_outputpath@${test_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_TestCluster_${Run}.cfg
+
+    echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+    echo cmsRun $cfg_path/mtcc_TestCluster_${Run}.cfg
+    echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+    cmsRun $cfg_path/mtcc_TestCluster_${Run}.cfg
+    exit_status=$?
+}
+
 #MAIN
 
 step=$1
@@ -143,6 +162,7 @@ export cfg_path=${workdir}/cfg
 export log_path=${workdir}/logs
 export fedconnections_path=${workdir}/fedconnections
 export output_path=${workdir}/output
+export test_path=${workdir}/test
 
 cd $CMSSW_path
 eval `scramv1 runtime -sh`
@@ -154,12 +174,18 @@ case "$step" in
 	unpack
 	;;    
 "runPedestals")
-#run pedestals
 	runPedestals
 	;;
 "runPhysics")
-#run pedestals
 	runPhysics 
+	;;
+"runTestCluster")
+	if [ '`echo $2 | grep -cw "[0-9]*"`' == '1' ]; 
+	    then
+	    echo -e "\n[usage] :run.sh runTestCluster runNb\n"
+	    exit
+	fi
+	runTestCluster $2
 	;;
 	*)
 	echo "please explicit an analysis step: unpack, runPedestals, runPhysics"
