@@ -135,7 +135,7 @@ step=$1
 
 #Env Var
 export workdir=`pwd`
-export CMSSW_path=${workdir}/CMSSW_0_6_0_pre6/src
+export CMSSW_path=${workdir}/CMSSW/src
 export tar_path=${workdir}/tars
 export runs_path=${workdir}/runs
 export pedestals_path=${workdir}/pedestals
