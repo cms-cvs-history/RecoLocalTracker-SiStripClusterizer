@@ -168,6 +168,8 @@ cd $CMSSW_path
 eval `scramv1 runtime -sh`
 cd -
 
+export CORAL_AUTH_PATH=${pedestals_path}
+
 case "$step" in
     "unpack")
 #Retrieve RU*.root from tar_path dir and save them in runs_path dir
