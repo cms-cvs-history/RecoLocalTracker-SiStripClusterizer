@@ -1,0 +1,36 @@
+module ThreeThresholdClusterizer =  SiStripClusterizer {
+    untracked int32 VerbosityLevel = 0
+
+           VPSet DigiProducersList = {
+                 { string DigiProducer = "stripdigi"
+                   string DigiLabel    = "stripdigi"
+                 }
+#,
+#               { string DigiProducer = "RawToDigi"
+#                 string DigiLabel    = "ZeroSuppressed"
+#               },
+#                { string DigiProducer = "theSiStripZeroSuppression"
+#                  string DigiLabel    = "fromVirginRaw"
+#                },
+#                { string DigiProducer = "theSiStripZeroSuppression"
+#                  string DigiLabel    = "fromProcessedRaw"
+#                },
+#                { string DigiProducer = "theSiStripZeroSuppression"
+#                  string DigiLabel    = "fromScopeMode"
+#                }
+              }	
+
+	untracked string userEnv   = "me"
+	untracked string passwdEnv = "me"
+           bool UseCalibDataFromDB = false
+
+	string ClusterMode         = "ThreeThresholdClusterizer"
+	double ChannelThreshold    = 2.0
+	double SeedThreshold       = 3.0
+	double ClusterThreshold    = 5.0
+	 int32 MaxHolesInCluster   = 0	
+
+        double ElectronPerAdc      = 313.0 
+	double EquivalentNoiseCharge300um = 2160.
+	double BadStripProbability = 0.0
+}
