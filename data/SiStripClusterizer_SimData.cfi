@@ -3,7 +3,7 @@ module ThreeThresholdClusterizer =  SiStripClusterizer {
 
            VPSet DigiProducersList = {
                  { string DigiProducer = "stripdigi"
-                   string DigiLabel    = "stripdigi"
+                   string DigiLabel    = "\0"
                  }
 #,
 #               { string DigiProducer = "RawToDigi"
