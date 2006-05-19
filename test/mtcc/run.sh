@@ -182,7 +182,7 @@ case "$step" in
 	runPhysics 
 	;;
 "runTestCluster")
-	if [ '`echo $2 | grep -cw "[0-9]*"`' == '1' ]; 
+	if [ "$2" == "" ] || [ '`echo $2 | grep -cw "[0-9]*"`' == '1' ]; 
 	    then
 	    echo -e "\n[usage] :run.sh runTestCluster runNb\n"
 	    exit
