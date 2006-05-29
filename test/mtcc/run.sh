@@ -69,7 +69,7 @@ function runPedestals(){
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-       #cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
       exit_status=$?
       
       if [ "$exit_status" == "0" ];
@@ -111,7 +111,7 @@ function runPhysics(){
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-      #cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
       exit_status=$?
 
       if [ "$exit_status" == "0" ];
