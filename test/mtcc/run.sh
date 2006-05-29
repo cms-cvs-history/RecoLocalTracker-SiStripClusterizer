@@ -19,6 +19,27 @@ function unpack(){
 
 }
 
+function getRunList(){      
+#Create input file list
+    runList=`echo $1 | sed -e "s#,# #g"`
+    inputfilenames=""
+    for runs in $runList
+      do
+      firstRun=`echo ${runs} | awk -F":" '{print $1}'`
+      lastRun=`echo ${runs} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
+      while [ ${firstRun} -le ${lastRun} ]
+	do
+	for file in `ls ${runs_path}/RU${firstRun}*root 2> /dev/null`
+	  do
+	  [ ! -e $file ] && continue
+	  inputfilenames="${inputfilenames},\"file:$file\""
+	done
+	let firstRun++
+      done      
+    done
+    inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
+    echo $inputfilenames
+}
 
 function runPedestals(){
     echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning Pedestals on files in $pedestals_path/PedestalRuns_List.dat\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
@@ -37,42 +58,30 @@ function runPedestals(){
       do
 
       #Create input file list
-      firstRun=`echo ${pedRuns[$i]} | awk -F":" '{print $1}'`
-      lastRun=`echo ${pedRuns[$i]} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
-      inputfilenames=""
-      while [ ${firstRun} -le ${lastRun} ]
-	do
-	for file in `ls ${runs_path}/*${firstRun}*root`
-	  do
-	  inputfilenames="${inputfilenames},\"file:$file\""
-	  done
-	let firstRun++
-      done
-      inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
+      inputfilenames=`getRunList ${pedRuns[$i]}`
+      echo $inputfilenames
 
-      #get iov
-      iovfirstRun=`echo ${iov[$i]} | awk -F":" '{print $1}'`
+#       #get iov
+      iovfirstRun=`echo ${iov[$i]} | awk -F"," '{print $1}' | awk -F":" '{print $1}'`
 
-      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${pedRuns[$i]}@g"> $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${pedRuns[$i]}@g"> $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-      cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+       #cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
       exit_status=$?
       
       if [ "$exit_status" == "0" ];
-	  then
-	  cat $pedestals_path/PedestalRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${pedRuns[$i]}\s*\|\s*${iov[$i]})@#&@g" >> file.tmp
-	  mv -f file.tmp $pedestals_path/PedestalRuns_List.dat
+ 	  then
+ 	  cat $pedestals_path/PedestalRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${pedRuns[$i]}\s*\|\s*${iov[$i]})@#&@g" >> file.tmp
+ 	  mv -f file.tmp $pedestals_path/PedestalRuns_List.dat
       else
-	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running Pedestals on cfg "
-	  cat $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
-	  echo -e "\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
-
-      fi
-
-      let i++
+ 	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running Pedestals on cfg "
+ 	  cat $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+ 	  echo -e "\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
+      fi      
+       let i++
     done
 }
 
@@ -90,28 +99,19 @@ function runPhysics(){
     i=0
     while [ $i -lt $Ndim ]
       do
-      
       #Create input file list
-      firstRun=`echo ${Runs[$i]} | awk -F":" '{print $1}'`
-      lastRun=`echo ${Runs[$i]} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
-      inputfilenames=""
-      while [ ${firstRun} -le ${lastRun} ]
-	do
-	for file in `ls ${runs_path}/*${firstRun}*root`
-	  do
-	  inputfilenames="${inputfilenames},\"file:$file\""
-	done
-	let firstRun++
-      done
-      inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
+      inputfilenames=`getRunList ${Runs[$i]}`
       echo $inputfilenames
+
+#       #get iov
+      iovfirstRun=`echo ${Runs[$i]} | awk -F"," '{print $1}' | awk -F":" '{print $1}'`
       
-      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${Runs[0]}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@${iovfirstRun}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-      cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      #cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
       exit_status=$?
 
       if [ "$exit_status" == "0" ];
@@ -247,7 +247,7 @@ case "$step" in
 	fi
 	runTestCluster $2
 	;;
-	*)
+ 	*)
 	echo "please explicit an analysis step: unpack, runPedestals, runPhysics, runDQM"
 	;;
 esac
