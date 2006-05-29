@@ -129,6 +129,61 @@ function runPhysics(){
     done
 }
 
+
+function runDQM(){
+    echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning DQM on files\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
+    
+    grep -v "\#" $output_path/PhysicsRuns_List.dat 
+    
+    fedconnections=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $1}'`)
+    Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
+    
+    Ndim=${#Runs[@]}
+    
+    #loop on entries
+    i=0
+    while [ $i -lt $Ndim ]
+      do
+      
+      #Create input file list
+      firstRun=`echo ${Runs[$i]} | awk -F":" '{print $1}'`
+      lastRun=`echo ${Runs[$i]} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
+      inputfilenames=""
+      while [ ${firstRun} -le ${lastRun} ]
+	do
+	for file in `ls ${runs_path}/*${firstRun}*root`
+	  do
+	  inputfilenames="${inputfilenames},\"file:$file\""
+	done
+	let firstRun++
+      done
+      inputfilenames=`echo $inputfilenames | sed -e "s@,@@"`
+      echo $inputfilenames
+      
+      cat $cfg_path/template_mtcc_dqm.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${Runs[0]}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@DQM_${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_dqmhistos_file@dqm_histos_${Runs[$i]}@g" > $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+
+      echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+      echo cmsRun $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+      echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+      cmsRun $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+      exit_status=$?
+
+      if [ "$exit_status" == "0" ];
+	  then
+	  cat $output_path/PhysicsRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${Runs[$i]})@#&@g" >> file.tmp
+	  mv -f file.tmp $output_path/DQMRuns_List.dat
+      else
+	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running DQM on cfg "
+	  cat $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+	  echo -e "\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
+
+      fi
+
+      let i++
+    done
+}
+
+
 function runTestCluster(){
     echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning TestCluster\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
 
@@ -181,6 +236,9 @@ case "$step" in
 "runPhysics")
 	runPhysics 
 	;;
+"runDQM")
+	runDQM 
+	;;
 "runTestCluster")
 	if [ "$2" == "" ] || [ '`echo $2 | grep -cw "[0-9]*"`' == '1' ]; 
 	    then
@@ -190,7 +248,7 @@ case "$step" in
 	runTestCluster $2
 	;;
 	*)
-	echo "please explicit an analysis step: unpack, runPedestals, runPhysics"
+	echo "please explicit an analysis step: unpack, runPedestals, runPhysics, runDQM"
 	;;
 esac
 
