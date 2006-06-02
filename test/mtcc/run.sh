@@ -237,7 +237,7 @@ case "$step" in
 	runTestCluster $2
 	;;
  	*)
-	echo "please explicit an analysis step: unpack, runPedestals, runPhysics, runTestCluster runNb,runDQM"
+	echo "please explicit an analysis step: unpack, runPedestals, runPhysics, runTestCluster <runNb>,runDQM"
 	;;
 esac
 
