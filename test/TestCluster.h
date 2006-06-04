@@ -71,6 +71,7 @@ namespace cms{
       std::map< uint32_t, TH1F* >  _TH1F_ClusterStoN_m;
       std::map< uint32_t, TH1F* >  _TH1F_PedestalsProfile_m;
       std::map< uint32_t, TH1F* >  _TH1F_NoisesProfile_m;
+      std::map< uint32_t, TH1F* >  _TH1F_BadStripNoiseProfile_m;
       std::vector<TH1F*> _TH1F_Noises_v;
       std::vector<TH1F*> _TH1F_ClusterSignal_v;
       std::vector<TH1F*> _TH1F_ClusterStoN_v;

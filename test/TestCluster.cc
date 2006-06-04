@@ -65,6 +65,15 @@ namespace cms{
 					      Parameters.getParameter<double>("xmin"),
 					      Parameters.getParameter<double>("xmax")
 					      );
+
+      sprintf(name,"BadStripNoiseProfile_%s_%d",_StripGeomDetUnit->type().name().c_str(),detid);
+      Parameters =  conf_.getParameter<edm::ParameterSet>("TH1BadStripNoiseProfile");
+      _TH1F_BadStripNoiseProfile_m[detid] = new TH1F(name,name,
+					      Parameters.getParameter<int32_t>("Nbinx"),
+					      Parameters.getParameter<double>("xmin"),
+					      Parameters.getParameter<double>("xmax")
+					      );
+
     }
 
     std::string SubDet[3]={"TIB","TOB","TEC"};
@@ -127,6 +136,13 @@ namespace cms{
 	  //Fill Noises
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill Noise detid " << detid << " strip " << istrip;
 	  _TH1F_NoisesProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getNoise(detid,istrip));
+	  //Fill BadStripNoise
+	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill BadStripNoise detid " << detid << " strip " << istrip;
+	  _TH1F_BadStripNoiseProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getDisable(detid,istrip)?1.:0.);
+
+
+
+
 	  
 	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
 	  _TH1F_Noises_v[iSubDet]->Fill(SiStripNoiseService_.getNoise(detid,istrip));
@@ -148,20 +164,14 @@ namespace cms{
       //Remove det with low entries
       {
 	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_ClusterSignal_m.find(detid);
-	if (hiter->second->GetMean()==0 || hiter->second->GetEntries() < 200){
-	  edm::LogError("TestCluster") << "[TestCluster::endJob]  " 
-				       << "il det " << hiter->first 
-				       << " non ha entries con media maggiore di zero || entries > 200";
+	if (hiter->second->GetMean()==0){
 	  delete hiter->second;
 	  _TH1F_ClusterSignal_m.erase(hiter);
 	}
       }
       {
 	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_ClusterStoN_m.find(detid);
-	if (hiter->second->GetMean()==0 || hiter->second->GetEntries() < 200){
-	  edm::LogError("TestCluster") << "[TestCluster::endJob]  " 
-				       << "il det " << hiter->first 
-				       << " non ha entries con media maggiore di zero || entries > 200";
+	if (hiter->second->GetMean()==0){
 	  delete hiter->second;
 	  _TH1F_ClusterStoN_m.erase(hiter);
 	}
@@ -169,9 +179,6 @@ namespace cms{
       {
 	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_PedestalsProfile_m.find(detid);
 	if (hiter->second->GetEntries() == 0){
-	  edm::LogError("TestCluster") << "[TestCluster::endJob]  " 
-				       << "il det " << hiter->first 
-				       << " non ha entries con media maggiore di zero || entries > 200";
 	  delete hiter->second;
 	  _TH1F_PedestalsProfile_m.erase(hiter);
 	}
@@ -179,13 +186,17 @@ namespace cms{
       {
 	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_NoisesProfile_m.find(detid);
 	if (hiter->second->GetEntries() == 0){
-	  edm::LogError("TestCluster") << "[TestCluster::endJob]  " 
-				       << "il det " << hiter->first 
-				       << " non ha entries con media maggiore di zero || entries > 200";
 	  delete hiter->second;
 	  _TH1F_NoisesProfile_m.erase(hiter);
 	}
-      }      
+      }
+           {
+	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_BadStripNoiseProfile_m.find(detid);
+	if (hiter->second->GetMean() == 0){
+	  delete hiter->second;
+	  _TH1F_BadStripNoiseProfile_m.erase(hiter);
+	}
+      } 
     }
 
     myFile->ls();
