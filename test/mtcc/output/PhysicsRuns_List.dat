@@ -1,10 +1,10 @@
 #Legend
 # list of runs: fisrt-last OR run_1,run_2,..,run_N
 #
-#fed connection file | first:last run 
+#fed connection file | first:last run | first-ped-run
 #
 #
-#tibtob	|	910854:910856	
-#tibtob	|	910862		
+#tibtob	|	910854:910856	| 910851
+#tibtob	|	910862		| 910861
 #zero suppp
-tibtob  |       910987
+tibtob  |       910987 		| 910986

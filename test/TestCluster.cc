@@ -50,6 +50,14 @@ namespace cms{
 					    Parameters.getParameter<double>("xmax")
 					    );
 
+      sprintf(name,"ClusterBarycenter_%s_%d",_StripGeomDetUnit->type().name().c_str(),detid);
+      Parameters =  conf_.getParameter<edm::ParameterSet>("TH1ClusterBarycenter");
+      _TH1F_ClusterBarycenter_m[detid] = new TH1F(name,name,
+					    Parameters.getParameter<int32_t>("Nbinx"),
+					    Parameters.getParameter<double>("xmin"),
+					    Parameters.getParameter<double>("xmax")
+					    );
+
       sprintf(name,"PedestalsProfile_%s_%d",_StripGeomDetUnit->type().name().c_str(),detid);
       Parameters =  conf_.getParameter<edm::ParameterSet>("TH1PedestalsProfile");
       _TH1F_PedestalsProfile_m[detid] = new TH1F(name,name,
@@ -176,6 +184,14 @@ namespace cms{
 	  _TH1F_ClusterStoN_m.erase(hiter);
 	}
       }
+     {
+      std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_ClusterBarycenter_m.find(detid);
+	if (hiter->second->GetMean()==0){
+	  delete hiter->second;
+	  _TH1F_ClusterBarycenter_m.erase(hiter);
+	}
+        }
+
       {
 	std::map<uint32_t,TH1F*>::iterator hiter = _TH1F_PedestalsProfile_m.find(detid);
 	if (hiter->second->GetEntries() == 0){
@@ -221,7 +237,8 @@ namespace cms{
       for(edm::DetSet<SiStripCluster>::const_iterator ic = DSViter->data.begin(); ic!=DSViter->data.end(); ic++) {
 
 	clusiz = ic->amplitudes().size();
-	int barycenter=((int)ic->barycenter())%128;
+	//	int barycenter=((int)ic->barycenter())%128;
+	int barycenter=((int)ic->barycenter());
 	float Signal=0;
 	float noise2=0;
 	int count=0;
@@ -238,6 +255,7 @@ namespace cms{
 	  //Fill Histos
 	  _TH1F_ClusterSignal_m.find(detid)->second->Fill(Signal);
 	  _TH1F_ClusterStoN_m.find(detid)->second->Fill(Signal/sqrt(noise2/count));
+	  _TH1F_ClusterBarycenter_m.find(detid)->second->Fill(barycenter);
 	  
 	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
 	  _TH1F_ClusterSignal_v[iSubDet]->Fill(Signal);

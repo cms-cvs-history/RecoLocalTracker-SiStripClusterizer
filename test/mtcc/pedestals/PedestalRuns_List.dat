@@ -1,12 +1,12 @@
 #Legend
-# list of runs: fisrt-last OR run_1,run_2,..,run_N
+# list of runs: fisrt-last OR run_1-run_2-..-run_N
 #
-#fed connection file | list of pedestals runs | IOV (first run)
+#fed connection file | list of pedestals runs 
 #
 #
-#tibtob	|	910851		|	910854
-#tibtob	|	910861		|	910862
+#tibtob	|	910851:910852		
+#tibtob	|	910861		
 #zero suppressed
-tibtob |       910986          |       910987
+tibtob |        910986           
 
 

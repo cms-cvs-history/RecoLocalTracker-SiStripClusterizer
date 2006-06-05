@@ -69,6 +69,7 @@ namespace cms{
       edm::ESHandle<TrackerGeometry> tkgeom;
       std::map< uint32_t, TH1F* >  _TH1F_ClusterSignal_m;
       std::map< uint32_t, TH1F* >  _TH1F_ClusterStoN_m;
+      std::map< uint32_t, TH1F* >  _TH1F_ClusterBarycenter_m;
       std::map< uint32_t, TH1F* >  _TH1F_PedestalsProfile_m;
       std::map< uint32_t, TH1F* >  _TH1F_NoisesProfile_m;
       std::map< uint32_t, TH1F* >  _TH1F_BadStripNoiseProfile_m;
