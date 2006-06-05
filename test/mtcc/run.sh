@@ -140,10 +140,13 @@ function runPhysics(){
 function runDQM(){
     echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning DQM on files\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
     
-    grep -v "\#" $output_path/PhysicsRuns_List.dat 
-    
+
+    grep -v "\#" $output_path/PhysicsRuns_List.dat
+
     fedconnections=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $1}'`)
-    Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
+              Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
+               iov=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $3}'`)
+
     
     Ndim=${#Runs[@]}
     
@@ -155,8 +158,12 @@ function runDQM(){
       #Create input file list
        inputfilenames=`getRunList ${Runs[$i]}`
       echo $inputfilenames
-      
-      cat $cfg_path/template_mtcc_dqm.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${Runs[0]}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@DQM_${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_dqmhistos_file@dqm_histos_${Runs[$i]}@g" > $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+
+#       #get iov
+      firstRun=`echo ${Runs[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
+      iovfirstRun=${iov[$i]}
+
+      cat $cfg_path/template_mtcc_dqm.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@DQM_${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_dqmhistos_file@dqm_histos_${Runs[$i]}@g" > $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
