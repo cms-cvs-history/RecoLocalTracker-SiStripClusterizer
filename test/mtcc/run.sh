@@ -21,7 +21,7 @@ function unpack(){
 
 function getRunList(){      
 #Create input file list
-    runList=`echo $1 | sed -e "s#,# #g"`
+    runList=`echo $1 | sed -e "s#-# #g"`
     inputfilenames=""
     for runs in $runList
       do
@@ -62,9 +62,12 @@ function runPedestals(){
       echo $inputfilenames
 
 #       #get iov
-      iovfirstRun=`echo ${iov[$i]} | awk -F"," '{print $1}' | awk -F":" '{print $1}'`
+      iovfirstRun=`echo ${iov[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
 
       cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${pedRuns[$i]}@g"> $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+
+      #Remove db file
+      rm ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
@@ -104,9 +107,9 @@ function runPhysics(){
       echo $inputfilenames
 
 #       #get iov
-      iovfirstRun=`echo ${Runs[$i]} | awk -F"," '{print $1}' | awk -F":" '{print $1}'`
+      firstRun=`echo ${Runs[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       
-      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@${iovfirstRun}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${firstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
