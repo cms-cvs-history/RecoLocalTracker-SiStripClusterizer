@@ -50,7 +50,7 @@ function runPedestals(){
            pedRuns=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $2}'`)
     #iov=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $3}'`)
     
-    Ndim=${#iov[@]}
+    Ndim=${#pedRuns[@]}
 
     #loop on entries
     i=0
