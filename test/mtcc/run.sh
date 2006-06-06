@@ -66,24 +66,24 @@ function runPedestals(){
       #iovfirstRun=`echo ${iov[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       iovfirstRun=$firstRun
 
-      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${firstRuns}@g"> $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${firstRun}@g"> $cfg_path/mtcc_pedestals_$firstRun.cfg
 
       #Remove db file
       rm ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-      echo cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      echo cmsRun $cfg_path/mtcc_pedestals_$firstRun.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-      cmsRun $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+      cmsRun $cfg_path/mtcc_pedestals_${firstRun}.cfg
       exit_status=$?
       
       if [ "$exit_status" == "0" ];
  	  then
- 	  cat $pedestals_path/PedestalRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${pedRuns[$i]}\s*\|\s*${iov[$i]})@#&@g" >> file.tmp
+ 	  cat $pedestals_path/PedestalRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${pedRuns[$i]})@#&@g" >> file.tmp
  	  mv -f file.tmp $pedestals_path/PedestalRuns_List.dat
       else
  	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running Pedestals on cfg "
- 	  cat $cfg_path/mtcc_pedestals_${pedRuns[$i]}.cfg
+ 	  cat $cfg_path/mtcc_pedestals_${firstRun}.cfg
  	  echo -e "\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
       fi      
        let i++
@@ -123,7 +123,7 @@ function runPhysics(){
 
       if [ "$exit_status" == "0" ];
 	  then
-	  cat $output_path/PhysicsRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${Runs[$i]})@#&@g" >> file.tmp
+	  cat $output_path/PhysicsRuns_List.dat | sed -re "s@(${fedconnections[$i]}\s*\|\s*${Runs[$i]}\s*\|\s*${iov[$i]})@#&@g" >> file.tmp
 	  mv -f file.tmp $output_path/PhysicsRuns_List.dat
       else
 	  echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nERROR Running Physics on cfg "
