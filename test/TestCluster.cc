@@ -13,8 +13,8 @@ namespace cms{
   void TestCluster::beginJob( const edm::EventSetup& es ) {
     char name[128];
     
-    SiStripNoiseService_.configure(es);
-    SiStripPedestalsService_.configure(es);
+    //    SiStripPedestalsService_.configure(es);
+    //SiStripPedestalsService_.configure(es);
     
     myFile = new TFile(filename_.c_str(),"RECREATE");
     myFile->cd();    
@@ -148,20 +148,8 @@ namespace cms{
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill BadStripNoise detid " << detid << " strip " << istrip;
 	  _TH1F_BadStripNoiseProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getDisable(detid,istrip)?1.:0.);
 
-
-
-
-	  
 	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
 	  _TH1F_Noises_v[iSubDet]->Fill(SiStripNoiseService_.getNoise(detid,istrip));
-	  //check
-	  if (SiStripNoiseService_.getNoise(detid,istrip) != SiStripPedestalsService_.getNoise(detid,istrip)) {
-	    edm::LogError("TestCluster") << "[TestCluster::endJob]  ERROR for detid " 
-					 << detid << " strip " << istrip 
-					 << "SiStripNoise and SiStripPedestal are different " 
-					 << SiStripNoiseService_.getNoise(detid,istrip) << " " 
-					 << SiStripPedestalsService_.getNoise(detid,istrip);
-	  }	
 	}
 	catch(cms::Exception& e){
 	  edm::LogError("TestCluster") << "[TestCluster::endJob]  cms::Exception:  DetName " << _StripGeomDetUnit->type().name() << " " << e.what() ;
