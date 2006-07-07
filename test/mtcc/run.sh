@@ -71,6 +71,11 @@ function runPedestals(){
       #Remove db file
       [ -e ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db ] && rm ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db
 
+      #Create new db file
+      echo -e "\n...Creating new db file, following custom mapping"
+      echo -e "pool_build_object_relational_mapping -f ${pedestals_path}/blobmappingfile.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db -u me -p mypass"
+      pool_build_object_relational_mapping -f ${pedestals_path}/blobmappingfile.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db 
+
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_$firstRun.cfg
       echo -e "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
@@ -234,6 +239,9 @@ eval `scramv1 runtime -sh`
 cd -
 
 export CORAL_AUTH_PATH=${pedestals_path}
+export CORAL_AUTH_USER=me
+export CORAL_AUTH_PASSWORD=me
+
 
 case "$step" in
     "unpack")
