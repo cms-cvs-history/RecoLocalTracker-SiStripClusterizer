@@ -47,6 +47,8 @@
 #include <string>
 #include <iostream>
 
+//#include "ClusterTree.h"
+
 namespace cms{
   class TestCluster : public edm::EDAnalyzer
     {
@@ -77,7 +79,14 @@ namespace cms{
       std::vector<TH1F*> _TH1F_ClusterSignal_v;
       std::vector<TH1F*> _TH1F_ClusterStoN_v;
       std::string filename_;
-      TFile* myFile;
+      TFile* fFile;
+/*       TTree* fTree; */
+/*       TTree* fTree2; */
+
+/*       ClusterEvent* ClusterEvent_; */
+
+      int runNb;
+      int eventNb;
 
       SiStripNoiseService SiStripNoiseService_;  
       SiStripPedestalsService SiStripPedestalsService_;  
