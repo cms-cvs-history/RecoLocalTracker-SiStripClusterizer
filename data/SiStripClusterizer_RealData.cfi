@@ -1,3 +1,6 @@
+#include noise parameters to be used in case UseCalibDataFromDB=false
+include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
+
 module ThreeThresholdClusterizer =  SiStripClusterizer {
     untracked int32 VerbosityLevel = 0
 
@@ -19,9 +22,6 @@ module ThreeThresholdClusterizer =  SiStripClusterizer {
                 }
               }	
 
-	untracked string userEnv   = "me"
-	untracked string passwdEnv = "me"
-           bool UseCalibDataFromDB = true
 
 	string ClusterMode         = "ThreeThresholdClusterizer"
 	double ChannelThreshold    = 2.0
@@ -29,7 +29,11 @@ module ThreeThresholdClusterizer =  SiStripClusterizer {
 	double ClusterThreshold    = 5.0
 	 int32 MaxHolesInCluster   = 0	
 
-        double ElectronPerAdc      = 313.0 
-	double EquivalentNoiseCharge300um = 2160.
+
+##
+##Parameters to configure SiStripNoiseService
+##
+          bool UseCalibDataFromDB  = true
+         using NoiseParameters     
 	double BadStripProbability = 0.0
 }
