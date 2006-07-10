@@ -73,8 +73,8 @@ function runPedestals(){
 
       #Create new db file
       echo -e "\n...Creating new db file, following custom mapping"
-      echo -e "pool_build_object_relational_mapping -f ${pedestals_path}/blobmappingfile.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db -u me -p mypass"
-      pool_build_object_relational_mapping -f ${pedestals_path}/blobmappingfile.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db 
+      echo -e "pool_build_object_relational_mapping -f ${pedestals_path}/Mapping-custom-1.0.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db -u me -p mypass"
+      pool_build_object_relational_mapping -f ${pedestals_path}/Mapping-custom-1.0.xml -d CondFormatsSiStripObjects -c sqlite_file:${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db  -u me -p mypass
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_pedestals_$firstRun.cfg
