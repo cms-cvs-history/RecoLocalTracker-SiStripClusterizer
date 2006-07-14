@@ -1,10 +1,15 @@
-#Legend
-# list of runs: fisrt-last OR run_1,run_2,..,run_N
-#
-#fed connection file | first:last run | first-ped-run
-#
-#
-#tibtob	|	910854:910856	| 910851
-#tibtob	|	910862		| 910861
-#zero suppp
+###Legend
+### list of runs: run_first:run_last OR run_1,run_2,..,run_N
+###
+### fed connection file | first:last run | first-ped-run
+###
+### Example
+### tibtob	|	2	| 1
+### tibtob	|	2:5	| 1
+### tibtob	|	2,4	| 1
+### tibtob	|	2,4:6	| 1
+
+### zero suppp
 tibtob  |       910987 		| 910986
+###
+
