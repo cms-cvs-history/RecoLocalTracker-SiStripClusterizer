@@ -118,7 +118,7 @@ function runPhysics(){
       firstRun=`echo ${Runs[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       iovfirstRun=${iov[$i]}
 
-      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@" | sed -e "s@insert_outputfilename@${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@" | sed -e "s@insert_outputfilename@${firstRun}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
