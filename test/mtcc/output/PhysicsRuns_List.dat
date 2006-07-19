@@ -1,13 +1,13 @@
 ###Legend
-### list of runs: run_first:run_last OR run_1,run_2,..,run_N
+### list of runs: run_first:run_last OR run_1-run_2-..-run_N
 ###
-### fed connection file | first:last run | first-ped-run
+### fed connection file | first:last run | first_ped_run
 ###
 ### Example
 ### tibtob	|	2	| 1
 ### tibtob	|	2:5	| 1
-### tibtob	|	2,4	| 1
-### tibtob	|	2,4:6	| 1
+### tibtob	|	2-4	| 1
+### tibtob	|	2-4:6	| 1
 
 ### zero suppp
 tibtob  |       910987 		| 910986
