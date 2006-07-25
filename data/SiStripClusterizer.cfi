@@ -1,3 +1,0 @@
-# include cfi for SimData
-include "RecoLocalTracker/SiStripClusterizer/data/SiStripClusterizer_SimData.cfi"
-
