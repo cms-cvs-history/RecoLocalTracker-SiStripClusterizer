@@ -49,6 +49,9 @@ function runPedestals(){
     fedconnections=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $1}'`)
            pedRuns=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $2}'`)
     #iov=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $3}'`)
+	   mode=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $3}'| sed -e 's@_GlobalDAQ@@g' -e 's@_LocalDAQ@@g'`)
+	   DAQ=(`grep -v "\#" $pedestals_path/PedestalRuns_List.dat | awk -F"|" '{print $3}' | sed -e 's@186_@@g' -e 's@p5_@@g'`)
+	   
     
     Ndim=${#pedRuns[@]}
 
@@ -66,7 +69,19 @@ function runPedestals(){
       #iovfirstRun=`echo ${iov[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       iovfirstRun=$firstRun
 
-      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@" | sed -e "s@insert_iovfirstRun@${iovfirstRun}@g"  | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_pedRuns@${firstRun}@g"> $cfg_path/mtcc_pedestals_$firstRun.cfg
+      if [ "${mode[$i]}" != "186" ] && [ "${mode[$i]}" != "p5" ]
+	  then
+	  echo -e "\nPlease explicit in PedestalRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+	  then
+	  echo -e "\nPlease explicit in PedestalsRun_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      cat $cfg_path/template_mtcc_pedestals.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@"  -e "s@insert_input_filenames@${inputfilenames}@"  -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@"  -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@"  -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@"  -e "s@insert_iovfirstRun@${iovfirstRun}@g"   -e "s@insert_logpath@${log_path}@g"  -e "s@insert_pedRuns@${firstRun}@g"  -e "s@##${mode[$i]}@@g" -e "s@##${DAQ[$i]}@@g" > $cfg_path/mtcc_pedestals_$firstRun.cfg
 
       #Remove db file
       [ -e ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db ] && rm ${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db
@@ -97,12 +112,14 @@ function runPedestals(){
 
 function runPhysics(){
     echo -e "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\nRunning Analysis on Physics Runs on files\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n"
-    
+
     grep -v "\#" $output_path/PhysicsRuns_List.dat 
     
     fedconnections=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $1}'`)
               Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
                iov=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $3}'`)
+	      mode=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $4}'| sed -e 's@_GlobalDAQ@@g' -e 's@_LocalDAQ@@g'`)
+	       DAQ=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $4}' | sed -e 's@186_@@g' -e 's@p5_@@g'`)
     
     Ndim=${#Runs[@]}
     
@@ -118,7 +135,19 @@ function runPhysics(){
       firstRun=`echo ${Runs[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       iovfirstRun=${iov[$i]}
 
-      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@" | sed -e "s@insert_outputfilename@${firstRun}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
+      if [ "${mode[$i]}" != "186" ] && [ "${mode[$i]}" != "p5" ]
+	  then
+	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+	  then
+	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      cat $cfg_path/template_mtcc_physics.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections[$i]}.dat@"  -e "s@insert_input_filenames@${inputfilenames}@"  -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@"  -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@"  -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@"  -e "s@insert_outputfilename@${firstRun}@g"  -e "s@insert_outputpath@${output_path}@g"  -e "s@insert_logpath@${log_path}@g" -e "s@##${mode[$i]}@@g" -e "s@##${DAQ[$i]}@@g" > $cfg_path/mtcc_physics_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_physics_${Runs[$i]}.cfg
@@ -151,6 +180,8 @@ function runDQM(){
     fedconnections=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $1}'`)
               Runs=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $2}'`)
                iov=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $3}'`)
+	      mode=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $4}'| sed -e 's@_GlobalDAQ@@g' -e 's@_LocalDAQ@@g'`)
+	       DAQ=(`grep -v "\#" $output_path/PhysicsRuns_List.dat | awk -F"|" '{print $4}' | sed -e 's@186_@@g' -e 's@p5_@@g'`)
 
     
     Ndim=${#Runs[@]}
@@ -168,7 +199,19 @@ function runDQM(){
       firstRun=`echo ${Runs[$i]} | awk -F"-" '{print $1}' | awk -F":" '{print $1}'`
       iovfirstRun=${iov[$i]}
 
-      cat $cfg_path/template_mtcc_dqm.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@" | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@DQM_${Runs[$i]}@g" | sed -e "s@insert_outputpath@${output_path}@g" | sed -e "s@insert_logpath@${log_path}@g" | sed -e "s@insert_dqmhistos_file@dqm_histos_${Runs[$i]}@g" > $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
+      if [ "${mode[$i]}" != "186" ] && [ "${mode[$i]}" != "p5" ]
+	  then
+	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+	  then
+	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
+	  exit
+      fi	
+
+      cat $cfg_path/template_mtcc_dqm.cfg | sed -e "s@insert_fedconnection_description@${fedconnections_path}/${fedconnections}.dat@"  -e "s@insert_input_filenames@${inputfilenames}@"  -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@"  -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@"  -e "s@insert_outputfilename@DQM_${Runs[$i]}@g"  -e "s@insert_outputpath@${output_path}@g"  -e "s@insert_logpath@${log_path}@g"  -e "s@insert_dqmhistos_file@dqm_histos_${firstRun}@g" -e "s@##${mode[$i]}@@g" -e "s@##${DAQ[$i]}@@g" > $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
 
       echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
       echo cmsRun $cfg_path/mtcc_dqm_${Runs[$i]}.cfg
@@ -209,7 +252,7 @@ function runTestCluster(){
     inputfilenames="\"file:${file}\""
     echo $inputfilenames
       
-    cat $cfg_path/template_mtcc_TestCluster.cfg | sed -e "s@insert_input_filenames@${inputfilenames}@" | sed -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@" | sed -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@" | sed -e "s@insert_outputfilename@TestCluster_${Run}@g" | sed -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@" | sed -e "s@insert_outputpath@${test_path}@g" | sed -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_TestCluster_${Run}.cfg
+    cat $cfg_path/template_mtcc_TestCluster.cfg | sed -e "s@insert_input_filenames@${inputfilenames}@"  -e "s@insert_SiStripPedNoisesDB@${pedestals_path}/SiStripPedNoises_${iovfirstRun}.db@"  -e "s@insert_SiStripPedNoisesCatalog@${pedestals_path}/SiStripPedNoisesCatalog.xml@"  -e "s@insert_outputfilename@TestCluster_${Run}@g"  -e "s@insert_mappingfileDB@${pedestals_path}/Mapping-custom-1.0.xml@"  -e "s@insert_outputpath@${test_path}@g"  -e "s@insert_logpath@${log_path}@g" > $cfg_path/mtcc_TestCluster_${Run}.cfg
 
     echo -e "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
     echo cmsRun $cfg_path/mtcc_TestCluster_${Run}.cfg
@@ -249,7 +292,7 @@ case "$step" in
 	unpack
 	;;    
 "runPedestals")
-	runPedestals
+	runPedestals 
 	;;
 "runPhysics")
 	runPhysics 

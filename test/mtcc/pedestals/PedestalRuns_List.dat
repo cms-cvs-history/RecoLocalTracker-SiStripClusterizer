@@ -1,17 +1,18 @@
 ###Legend
 ### list of runs: run_first:run_last OR run_1-run_2-..-run_N
 ###
-###fed connection file | list of pedestals runs 
+###fed connection file | list of pedestals runs  | type_of_run
 ###
 ### Eample
-###tibtob	|  1
-###tibtob	|  1:3
-###tibtob	|  1-3
-###tibtob	|  1-3:5
-
+###tibtob	|  1      | 186_LocalDAQ 
+###tibtob	|  1:3    | p5_LocalDAQ   
+###tibtob	|  1,3    | p5_LocalDAQ 
+###tibtob	|  1,3:5  | p5_GlobalDAQ   
 
 ### zero suppressed
-tibtob |        910986
+tibtob |        910986 | 186_LocalDAQ
+###
+#p5 |        20059      | p5_LocalDAQ 
 ### 
 
 
