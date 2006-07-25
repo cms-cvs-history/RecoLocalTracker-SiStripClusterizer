@@ -1,7 +1,7 @@
 #include noise parameters to be used in case UseCalibDataFromDB=false
 include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
 
-module ThreeThresholdClusterizer =  SiStripClusterizer {
+module SiStripClusters =  SiStripClusterizer {
     untracked int32 VerbosityLevel = 0
 
            VPSet DigiProducersList = {
