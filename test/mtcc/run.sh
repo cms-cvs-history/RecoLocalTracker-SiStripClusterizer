@@ -29,7 +29,7 @@ function getRunList(){
       lastRun=`echo ${runs} | awk -F":" '{ if ($2 != "" ) print $2; else print $1}'`
       while [ ${firstRun} -le ${lastRun} ]
 	do
-	for file in `ls ${runs_path}/RU*${firstRun}*root 2> /dev/null`
+	for file in `ls ${runs_path}/*${firstRun}*root 2> /dev/null`
 	  do
 	  [ ! -e $file ] && continue
 	  inputfilenames="${inputfilenames},\"file:$file\""
@@ -75,7 +75,7 @@ function runPedestals(){
 	  exit
       fi	
 
-      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GlobalDAQ" ]
 	  then
 	  echo -e "\nPlease explicit in PedestalsRun_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
 	  exit
@@ -141,7 +141,7 @@ function runPhysics(){
 	  exit
       fi	
 
-      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GlobalDAQ" ]
 	  then
 	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
 	  exit
@@ -205,7 +205,7 @@ function runDQM(){
 	  exit
       fi	
 
-      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GLobalDAQ" ]
+      if [ "${DAQ[$i]}" != "LocalDAQ" ] && [ "${DAQ[$i]}" != "GlobalDAQ" ]
 	  then
 	  echo -e "\nPlease explicit in PhysicsRuns_List.dat if run is 186_LocalDAQ or p5_LocalDAQ or p5_GlobalDAQ\n"
 	  exit
