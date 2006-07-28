@@ -14,3 +14,6 @@
 tibtob  |       910987 | 910986 | 186_LocalDAQ
 ###
 #p5       |        20059 | 20059  | p5_LocalDAQ 
+#p5       |        20230 | 20230  | p5_LocalDAQ 
+#p5       |        1946  | 20230  | p5_GlobalDAQ 
+#p5       |        1952  | 20230  | p5_GlobalDAQ 
