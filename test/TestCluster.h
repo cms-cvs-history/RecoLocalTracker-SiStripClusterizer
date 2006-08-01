@@ -33,6 +33,7 @@
 //SiStripPedestalsService
 #include "RecoLocalTracker/SiStripZeroSuppression/interface/SiStripPedestalsService.h"
 #include "RecoLocalTracker/SiStripClusterizer/interface/SiStripNoiseService.h"
+#include "FWCore/ParameterSet/interface/InputTag.h"
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -90,6 +91,7 @@ namespace cms{
 
       SiStripNoiseService SiStripNoiseService_;  
       SiStripPedestalsService SiStripPedestalsService_;  
+      edm::InputTag src_;
     };
 }
 #endif

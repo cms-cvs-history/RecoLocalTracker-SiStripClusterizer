@@ -5,7 +5,8 @@ namespace cms{
     conf_(conf),
     filename_(conf.getParameter<std::string>("fileName")), 
     SiStripNoiseService_(conf),
-    SiStripPedestalsService_(conf)
+    SiStripPedestalsService_(conf),
+    src_( conf.getParameter<edm::InputTag>( "src" ) )
   {};
 
   TestCluster::~TestCluster(){};
@@ -243,7 +244,7 @@ namespace cms{
 
     //Get input 
     edm::Handle< edm::DetSetVector<SiStripCluster> >  input;
-    e.getByLabel("ThreeThresholdClusterizer",input);
+    e.getByLabel( src_, input);
     
     SiStripNoiseService_.setESObjects(es);
     SiStripPedestalsService_.setESObjects(es);
