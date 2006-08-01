@@ -1,14 +1,14 @@
 #include noise parameters to be used in case UseCalibDataFromDB=false
 include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
 
-module SiStripClusters =  SiStripClusterizer {
+module siStripClusters =  SiStripClusterizer {
     untracked int32 VerbosityLevel = 0
 
            VPSet DigiProducersList = {
 #                { string DigiProducer = "stripdigi"
 #                  string DigiLabel    = "\0"
 #                },
-                { string DigiProducer = "RawToDigi"
+                { string DigiProducer = "siStripDigis"
                   string DigiLabel    = "ZeroSuppressed"
                 },
                 { string DigiProducer = "theSiStripZeroSuppression"
@@ -23,7 +23,7 @@ module SiStripClusters =  SiStripClusterizer {
               }	
 
 
-	string ClusterMode         = "ThreeThresholdClusterizer"
+	string ClusterMode         = "siStripClusters"
 	double ChannelThreshold    = 3.0
 	double SeedThreshold       = 4.0
 	double ClusterThreshold    = 5.0
