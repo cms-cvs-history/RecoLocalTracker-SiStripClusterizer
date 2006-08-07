@@ -31,8 +31,8 @@
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 
 //SiStripPedestalsService
-#include "RecoLocalTracker/SiStripZeroSuppression/interface/SiStripPedestalsService.h"
-#include "RecoLocalTracker/SiStripClusterizer/interface/SiStripNoiseService.h"
+#include "CommonTools/SiStripZeroSuppression/interface/SiStripPedestalsService.h"
+#include "CommonTools/SiStripZeroSuppression/interface/SiStripNoiseService.h"
 #include "FWCore/ParameterSet/interface/InputTag.h"
 
 #include "TROOT.h"
