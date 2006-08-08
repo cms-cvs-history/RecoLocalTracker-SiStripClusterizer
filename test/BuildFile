@@ -13,8 +13,7 @@
 <use name=CondCore/IOVService>
 <use name=CondCore/MetaDataService>
 
-<use name=RecoLocalTracker/SiStripZeroSuppression>
-<use name=RecoLocalTracker/SiStripClusterizer>
+<use name=CommonTools/SiStripZeroSuppression>
 
 <use name=Geometry/CommonDetUnit>
 <use name=Geometry/TrackerGeometryBuilder>	
