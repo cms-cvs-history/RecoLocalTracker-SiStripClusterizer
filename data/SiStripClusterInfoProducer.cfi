@@ -1,0 +1,15 @@
+#include noise parameters to be used in case UseCalibDataFromDB=false
+include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
+
+
+module siStripClusterInfoProducer = SiStripClusterInfoProducer{
+    string ClusterProducer = "siStripClusters"
+    string ClusterLabel    = "\0"
+
+    ##
+    ##Parameters to configure SiStripNoiseService
+    ##
+    using NoiseParameters
+    bool  UseCalibDataFromDB  = true
+    double BadStripProbability = 0.0
+}
