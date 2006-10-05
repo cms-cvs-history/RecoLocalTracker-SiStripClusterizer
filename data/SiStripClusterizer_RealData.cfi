@@ -8,17 +8,17 @@ module siStripClusters =  SiStripClusterizer {
 #                { string DigiProducer = "stripdigi"
 #                  string DigiLabel    = "\0"
 #                },
-                { string DigiProducer = "siStripDigis"
+                { string DigiProducer = "SiStripDigis"
                   string DigiLabel    = "ZeroSuppressed"
                 },
-                { string DigiProducer = "theSiStripZeroSuppression"
-                  string DigiLabel    = "fromVirginRaw"
+                { string DigiProducer = "siStripZeroSuppression"
+                  string DigiLabel    = "VirginRaw"
                 },
-                { string DigiProducer = "theSiStripZeroSuppression"
-                  string DigiLabel    = "fromProcessedRaw"
+                { string DigiProducer = "siStripZeroSuppression"
+                  string DigiLabel    = "ProcessedRaw"
                 },
-                { string DigiProducer = "theSiStripZeroSuppression"
-                  string DigiLabel    = "fromScopeMode"
+                { string DigiProducer = "siStripZeroSuppression"
+                  string DigiLabel    = "ScopeMode"
                 }
               }	
 
