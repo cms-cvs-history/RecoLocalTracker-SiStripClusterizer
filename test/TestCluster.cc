@@ -267,7 +267,7 @@ namespace cms{
 	float Signal=0;
 	float noise2=0;
 	int count=0;	  
-	const std::vector<short> amplitudes=ic->amplitudes();
+	const std::vector<uint16_t> amplitudes=ic->amplitudes();
 	for(size_t i=0; i<amplitudes.size();i++)
 	  if (amplitudes[i]>0){
 	    Signal+=amplitudes[i];
