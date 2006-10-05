@@ -6,6 +6,18 @@ module siStripClusterInfoProducer = SiStripClusterInfoProducer{
     string ClusterProducer = "siStripClusters"
     string ClusterLabel    = "\0"
 
+    bool RawModeRun = false
+    VPSet RawDigiProducersList = {
+	{  string RawDigiProducer = "SiStripDigis" string RawDigiLabel = "VirginRaw"    }
+	,{ string RawDigiProducer = "SiStripDigis" string RawDigiLabel = "ProcessedRaw" }
+	#,{ string RawDigiProducer = "SiStripDigis" string RawDigiLabel = "ScopeMode"   }
+    }	
+
+    uint32 NeighbourStripNumber = 3
+    string CommonModeNoiseSubtractionMode = "Median" #Supported modes: Median, TT6
+    double CutToAvoidSignal = 3  ## Used only if  CommonModeNoiseSubtractionMode= "TT6"
+
+
     ##
     ##Parameters to configure SiStripNoiseService
     ##
