@@ -1,5 +1,5 @@
-#include noise parameters to be used in case UseCalibDataFromDB=false
-include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
+#include SiStripNoiseService parameters
+include "CommonTools/SiStripZeroSuppression/data/SiStripNoiseService.cfi"
 
 module siStripClusters =  SiStripClusterizer {
     untracked int32 VerbosityLevel = 0
@@ -30,9 +30,9 @@ module siStripClusters =  SiStripClusterizer {
 	 int32 MaxHolesInCluster   = 0	
 
 ##
-##Parameters to configure SiStripNoiseService and SiStripPedestalService
+##Parameters to configure SiStripNoiseService 
 ##
-          bool UseCalibDataFromDB  = false
-         using NoiseParameters     
-	double BadStripProbability = 0.0
+    using SiStripNoiseServiceParameters
 }
+replace siStripClusters.UseCalibDataFromDB  = false
+

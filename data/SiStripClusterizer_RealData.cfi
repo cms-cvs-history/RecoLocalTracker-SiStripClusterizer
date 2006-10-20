@@ -1,39 +1,39 @@
 #include noise parameters to be used in case UseCalibDataFromDB=false
-include "SimTracker/SiStripDigitizer/data/NoiseParameters.cfi"
+include "CommonTools/SiStripZeroSuppression/data/SiStripNoiseService.cfi"
 
 module siStripClusters =  SiStripClusterizer {
     untracked int32 VerbosityLevel = 0
+    
+    VPSet DigiProducersList = {
+	#                { string DigiProducer = "stripdigi"
+	#                  string DigiLabel    = "\0"
+	#                },
+	{ string DigiProducer = "SiStripDigis"
+	    string DigiLabel    = "ZeroSuppressed"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "VirginRaw"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "ProcessedRaw"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "ScopeMode"
+	}
+    }	
+    
+    
+    string ClusterMode         = "ThreeThresholdClusterizer"
+    double ChannelThreshold    = 3.0
+    double SeedThreshold       = 4.0
+    double ClusterThreshold    = 5.0
+    int32 MaxHolesInCluster   = 0	
+    
+    
+    ##
+    ##Parameters to configure SiStripNoiseService
+    ##
+    using SiStripNoiseServiceParameters
 
-           VPSet DigiProducersList = {
-#                { string DigiProducer = "stripdigi"
-#                  string DigiLabel    = "\0"
-#                },
-                { string DigiProducer = "SiStripDigis"
-                  string DigiLabel    = "ZeroSuppressed"
-                },
-                { string DigiProducer = "siStripZeroSuppression"
-                  string DigiLabel    = "VirginRaw"
-                },
-                { string DigiProducer = "siStripZeroSuppression"
-                  string DigiLabel    = "ProcessedRaw"
-                },
-                { string DigiProducer = "siStripZeroSuppression"
-                  string DigiLabel    = "ScopeMode"
-                }
-              }	
-
-
-	string ClusterMode         = "ThreeThresholdClusterizer"
-	double ChannelThreshold    = 3.0
-	double SeedThreshold       = 4.0
-	double ClusterThreshold    = 5.0
-	 int32 MaxHolesInCluster   = 0	
-
-
-##
-##Parameters to configure SiStripNoiseService
-##
-          bool UseCalibDataFromDB  = true
-         using NoiseParameters     
-	double BadStripProbability = 0.0
 }
+
