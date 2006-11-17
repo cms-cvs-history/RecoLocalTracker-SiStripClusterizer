@@ -7,9 +7,9 @@ namespace cms{
     SiStripNoiseService_(conf),
     SiStripPedestalsService_(conf),
     src_( conf.getParameter<edm::InputTag>( "src" ) )
-  {};
+  {}
 
-  TestCluster::~TestCluster(){};
+  TestCluster::~TestCluster(){}
   
   void TestCluster::beginJob( const edm::EventSetup& es ) {
     char name[128];
