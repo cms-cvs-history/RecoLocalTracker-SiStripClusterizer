@@ -5,7 +5,9 @@ module siStripClusterInfoProducer = SiStripClusterInfoProducer{
     string ClusterProducer = "siStripClusters"
     string ClusterLabel    = "\0"
 
-    bool RawModeRun = false
+    string DigiProducer = "SiStripDigis"
+    string DigiLabel    = "ZeroSuppressed"
+
     VPSet RawDigiProducersList = {
 	{  string RawDigiProducer = "SiStripDigis" string RawDigiLabel = "VirginRaw"    }
 	,{ string RawDigiProducer = "SiStripDigis" string RawDigiLabel = "ProcessedRaw" }
@@ -21,6 +23,11 @@ module siStripClusterInfoProducer = SiStripClusterInfoProducer{
     ##Parameters to configure SiStripNoiseService
     ##
     using SiStripNoiseServiceParameters
+
+    ## and and SiStripPedestalService
+    uint32  PedestalValue      = 30
+    double  LowThValue         =  2
+    double  HighThValue        =  5
 }
 #To use simulated noise strip (proportional to strip length) uncomment the following line
 #replace siStripClusterInfoProducer.UseCalibDataFromDB  = false
