@@ -24,7 +24,7 @@
 
 
 <library file="*.cc" name=RecoLocalTrackerSiStripClusterizerTestModules>
-<flags  SEAL_PLUGIN_NAME="RecoLocalTrackerSiStripClusterizerTestModules">
+<flags EDM_PLUGIN=1>
 </library>
 
 
