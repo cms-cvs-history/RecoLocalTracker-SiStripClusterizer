@@ -28,7 +28,8 @@ module siStripClusters =  SiStripClusterizer {
     double SeedThreshold       = 4.0
     double ClusterThreshold    = 5.0
     int32 MaxHolesInCluster   = 0	
-    
+
+    bool UseGainFromDB        = false    
     
     ##
     ##Parameters to configure SiStripNoiseService
