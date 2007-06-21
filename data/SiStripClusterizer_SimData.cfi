@@ -34,5 +34,5 @@ module siStripClusters =  SiStripClusterizer {
 ##
     using SiStripNoiseServiceParameters
 }
-replace siStripClusters.UseCalibDataFromDB  = false
+#replace siStripClusters.UseCalibDataFromDB  = false
 
