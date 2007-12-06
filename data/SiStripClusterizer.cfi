@@ -1,5 +1,4 @@
 module siStripClusters =  SiStripClusterizer {
-    untracked int32 VerbosityLevel = 0
 
            VPSet DigiProducersList = {
                  { string DigiProducer = "siStripDigis"
@@ -20,13 +19,14 @@ module siStripClusters =  SiStripClusterizer {
 #                }
               }	
 
-	string ClusterMode         = "ThreeThresholdClusterizer"
-	double ChannelThreshold    = 2.0
-	double SeedThreshold       = 3.0
-	double ClusterThreshold    = 5.0
-	 int32 MaxHolesInCluster   = 0	
 
-
+    string SiStripQualityLabel = ""
+    
+    string ClusterMode         = "ThreeThresholdClusterizer"
+    double ChannelThreshold    = 2.0
+    double SeedThreshold       = 3.0
+    double ClusterThreshold    = 5.0
+    int32 MaxHolesInCluster    = 0	
 }
 
 
