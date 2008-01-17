@@ -19,7 +19,7 @@ module siStripClusters =  SiStripClusterizer {
 # 	}
     }	
     
-    string SiStripQualityLabel = ""
+    string SiStripQualityLabel = "" //Use SiStripQualityLabel="NULL" to use self build empty SiStripQuality  
 
     string ClusterMode         = "ThreeThresholdClusterizer"
     double ChannelThreshold    = 2.0
