@@ -1,0 +1,26 @@
+module siStripClusters =  SiStripClusterizer {
+    VPSet DigiProducersList = {
+	{ string DigiProducer = "siStripDigis"
+	    string DigiLabel    = "ZeroSuppressed"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "VirginRaw"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "ProcessedRaw"
+	},
+	{ string DigiProducer = "siStripZeroSuppression"
+	    string DigiLabel    = "ScopeMode"
+	}
+    }	
+
+    string SiStripQualityLabel = "" //Use SiStripQualityLabel="NULL" to use self build empty SiStripQuality  
+    
+    
+    string ClusterMode         = "ThreeThresholdClusterizer"
+    double ChannelThreshold    = 2.0
+    double SeedThreshold       = 3.0
+    double ClusterThreshold    = 5.0
+    int32 MaxHolesInCluster    = 0	
+}
+
