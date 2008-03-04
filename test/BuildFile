@@ -12,7 +12,8 @@
 <use name=CondCore/IOVService>
 <use name=CondCore/MetaDataService>
 
-<use name=CommonTools/SiStripZeroSuppression>
+<use name=CalibFormats/SiStripObjects>
+<use name=CalibTracker/Records>
 
 <use name=Geometry/CommonDetUnit>
 <use name=Geometry/TrackerGeometryBuilder>	

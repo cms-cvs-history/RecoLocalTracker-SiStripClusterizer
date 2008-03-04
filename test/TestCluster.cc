@@ -4,8 +4,6 @@ namespace cms{
   TestCluster::TestCluster(edm::ParameterSet const& conf): 
     conf_(conf),
     filename_(conf.getParameter<std::string>("fileName")), 
-    SiStripNoiseService_(conf),
-    SiStripPedestalsService_(conf),
     src_( conf.getParameter<edm::InputTag>( "src" ) )
   {}
 
@@ -136,8 +134,17 @@ namespace cms{
     }
   }
 
-  void TestCluster::endJob() {  
-    edm::LogInfo("TestCluster") << "[TestCluster::endJob] >>> ending histograms" << std::endl;
+  void TestCluster::endRun(const edm::Run& erun, const edm::EventSetup& es) {  
+    edm::LogInfo("TestCluster") << "[TestCluster::endRun] >>> ending histograms" << std::endl;
+
+    edm::ESHandle<SiStripPedestals> pedestalHandle;
+    edm::ESHandle<SiStripNoises> noiseHandle;
+    edm::ESHandle<SiStripQuality> qualityHandle;
+
+    es.get<SiStripPedestalsRcd>().get(pedestalHandle);
+    es.get<SiStripNoisesRcd>().get(noiseHandle);
+    es.get<SiStripQualityRcd>().get(qualityHandle);
+
 
     fFile->cd();
 
@@ -158,21 +165,26 @@ namespace cms{
 
       edm::LogInfo("TestCluster") << "[TestCluster::endJob] Nstrip for detID " << detid << " of name " <<  _StripGeomDetUnit->type().name().c_str() << " is " << numStrips;
 
+      SiStripPedestals::Range detPedRange = pedestalHandle->getRange(detid);
+      SiStripNoises::Range detNoiseRange = noiseHandle->getRange(detid);
+      SiStripQuality::Range detQualityRange = qualityHandle->getRange(detid);
+
+
       for (int istrip=0;istrip<numStrips;istrip++){
 
 	try{
 	  //Fill Pedestals
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill Ped detid " << detid << " strip " << istrip;
-	  _TH1F_PedestalsProfile_m.find(detid)->second->Fill(istrip,SiStripPedestalsService_.getPedestal(detid,istrip));
+	  _TH1F_PedestalsProfile_m.find(detid)->second->Fill(istrip,pedestalHandle->getPed(istrip,detPedRange));
 	  //Fill Noises
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill Noise detid " << detid << " strip " << istrip;
-	  _TH1F_NoisesProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getNoise(detid,istrip));
+	  _TH1F_NoisesProfile_m.find(detid)->second->Fill(istrip,noiseHandle->getNoise(istrip,detNoiseRange));
 	  //Fill BadStripNoise
 	  edm::LogInfo("TestCluster") << "[TestCluster::endJob] Fill BadStripNoise detid " << detid << " strip " << istrip;
-	  _TH1F_BadStripNoiseProfile_m.find(detid)->second->Fill(istrip,SiStripNoiseService_.getDisable(detid,istrip)?1.:0.);
+	  _TH1F_BadStripNoiseProfile_m.find(detid)->second->Fill(istrip,qualityHandle->IsStripBad(detQualityRange,istrip)?1.:0.);
 
 	  int iSubDet=_StripGeomDetUnit->specificType().subDetector()-1;
-	  _TH1F_Noises_v[iSubDet]->Fill(SiStripNoiseService_.getNoise(detid,istrip));
+	  _TH1F_Noises_v[iSubDet]->Fill(noiseHandle->getNoise(istrip,detNoiseRange));
 	}
 	catch(cms::Exception& e){
 	  edm::LogError("TestCluster") << "[TestCluster::endJob]  cms::Exception:  DetName " << _StripGeomDetUnit->type().name() << " " << e.what() ;
@@ -246,14 +258,18 @@ namespace cms{
     edm::Handle< edm::DetSetVector<SiStripCluster> >  input;
     e.getByLabel( src_, input);
     
-    SiStripNoiseService_.setESObjects(es);
-    SiStripPedestalsService_.setESObjects(es);
+
+    edm::ESHandle<SiStripNoises> noiseHandle;
+    es.get<SiStripNoisesRcd>().get(noiseHandle);
+
 
     //Loop on Dets
     edm::DetSetVector<SiStripCluster>::const_iterator DSViter=input->begin();
     for (; DSViter!=input->end();DSViter++){
       uint32_t detid = DSViter->id;
       const StripGeomDetUnit*_StripGeomDetUnit = dynamic_cast<const StripGeomDetUnit*>(tkgeom->idToDetUnit(DetId(detid)));
+
+      SiStripNoises::Range detNoiseRange = noiseHandle->getRange(detid);
             
       int clusize=0;      
       //std::vector<Cluster> vCluster;
@@ -271,7 +287,7 @@ namespace cms{
 	for(size_t i=0; i<amplitudes.size();i++)
 	  if (amplitudes[i]>0){
 	    Signal+=amplitudes[i];
-	    noise2+=SiStripNoiseService_.getNoise(detid,ic->firstStrip()+i)*SiStripNoiseService_.getNoise(detid,ic->firstStrip()+i);
+	    noise2+=noiseHandle->getNoise(ic->firstStrip()+i,detNoiseRange)*noiseHandle->getNoise(ic->firstStrip()+i,detNoiseRange);
 	    count++;
 
 	    //Find strip with max charge

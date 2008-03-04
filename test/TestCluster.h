@@ -15,6 +15,7 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetUnit.h"
+#include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetType.h"
 //needed for the geometry:
@@ -30,9 +31,15 @@
 #include "DataFormats/SiStripDigi/interface/SiStripDigi.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
 
-//SiStripPedestalsService
-#include "CommonTools/SiStripZeroSuppression/interface/SiStripPedestalsService.h"
-#include "CommonTools/SiStripZeroSuppression/interface/SiStripNoiseService.h"
+#include "CondFormats/DataRecord/interface/SiStripNoisesRcd.h"
+#include "CondFormats/DataRecord/interface/SiStripPedestalsRcd.h"
+#include "CalibTracker/Records/interface/SiStripQualityRcd.h"
+
+#include "CondFormats/SiStripObjects/interface/SiStripNoises.h"
+#include "CondFormats/SiStripObjects/interface/SiStripPedestals.h"
+#include "CalibFormats/SiStripObjects/interface/SiStripQuality.h"
+
+
 #include "FWCore/ParameterSet/interface/InputTag.h"
 
 #include "TROOT.h"
@@ -61,7 +68,7 @@ namespace cms{
       
       void beginJob( const edm::EventSetup& es );
       
-      void endJob();
+      void endRun(const edm::Run& erun, const edm::EventSetup& es);
       
       void analyze(const edm::Event& e, const edm::EventSetup& c);
   
@@ -89,8 +96,6 @@ namespace cms{
       int runNb;
       int eventNb;
 
-      SiStripNoiseService SiStripNoiseService_;  
-      SiStripPedestalsService SiStripPedestalsService_;  
       edm::InputTag src_;
     };
 }
