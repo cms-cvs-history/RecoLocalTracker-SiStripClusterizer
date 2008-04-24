@@ -1,1 +1,1 @@
-include "RecoLocalTracker/SiStripClusterizer/data/SiStripClusterizer_SimData2.cfi"
+include "RecoLocalTracker/SiStripClusterizer/data/SiStripClusterizer_RealData.cfi"

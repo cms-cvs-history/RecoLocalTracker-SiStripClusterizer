@@ -3,7 +3,7 @@ module siStripClusters =  SiStripClusterizer {
 	#                { string DigiProducer = "stripdigi"
 	#                  string DigiLabel    = "\0"
 	#                },
-	{ string DigiProducer = "SiStripDigis"
+	{ string DigiProducer = "siStripDigis"
 	    string DigiLabel    = "ZeroSuppressed"
 	},
 	{ string DigiProducer = "siStripZeroSuppression"

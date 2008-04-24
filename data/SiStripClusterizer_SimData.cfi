@@ -1,7 +1,7 @@
 module siStripClusters =  SiStripClusterizer {
     
     VPSet DigiProducersList = {
-	{ string DigiProducer = "siStripDigis"
+	{ string DigiProducer = "simSiStripDigis"
 	    string DigiLabel    = "\0"
 	}
 # 	,
