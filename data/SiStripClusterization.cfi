@@ -1,9 +1,0 @@
-
-block SiStripClusterization = {
-    
-    untracked string ClusterizerAlgorithm = "ThreeThreshold"
-    untracked double ChannelThreshold = 2.0
-    untracked double SeedThreshold = 3.0
-    untracked double ClusterThreshold = 5.0
-    untracked uint32 MaxHolesInCluster = 0
-}
