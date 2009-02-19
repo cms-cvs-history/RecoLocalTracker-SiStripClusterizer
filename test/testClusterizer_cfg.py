@@ -3,7 +3,9 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("USER")
 process.add_(cms.Service( "MessageLogger"))
 process.source = cms.Source( "EmptySource" )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
+
+process.load("PerfTools.Callgrind.callgrindSwitch_cfi")
 
 process.SiStripNoisesRcdSource = cms.ESSource( "EmptyESSource",
                                                recordName = cms.string( "SiStripNoisesRcd" ),
@@ -30,4 +32,4 @@ process.es           = cms.ESProducer("ClusterizerUnitTesterESProducer",
 process.runUnitTests = cms.EDAnalyzer("ClusterizerUnitTester",
                                       ClusterizerTestGroups = testDefinition  )
 
-process.path = cms.Path( process.runUnitTests )
+process.path = cms.Path( process.profilerStart * process.runUnitTests * process.profilerStop)
