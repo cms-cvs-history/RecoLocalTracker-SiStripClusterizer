@@ -1,268 +1,151 @@
 #include "RecoLocalTracker/SiStripClusterizer/interface/ThreeThresholdStripClusterizer.h"
-#include "sstream"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#define PATCH_FOR_DIGIS_DUPLICATION
+#include "CondFormats/DataRecord/interface/SiStripNoisesRcd.h"
+#include "CalibTracker/Records/interface/SiStripGainRcd.h"
+#include "CalibTracker/Records/interface/SiStripQualityRcd.h"
 
-void ThreeThresholdStripClusterizer::init(const edm::EventSetup& es) {
-  //Get ESObject 
-  es.get<SiStripGainRcd>().get(gainHandle_);
-  es.get<SiStripNoisesRcd>().get(noiseHandle_);
-  es.get<SiStripQualityRcd>().get(qualityLabel_,qualityHandle_);
+#include <sstream>
+#include <cmath>
+#include <numeric>
+#include <algorithm>
+
+ThreeThresholdStripClusterizer::
+ThreeThresholdStripClusterizer(float strip_thr, float seed_thr,float clust_thr, int max_holes, int max_bad, int max_adj) : 
+  info(new ESinfo(strip_thr,seed_thr,clust_thr,max_holes,max_bad,max_adj)) {
+  ADCs.reserve(128); //largest possible cluster (2APV * 64 adjacent strips per APV)
 }
 
-void ThreeThresholdStripClusterizer::clusterizeDetUnit(const edm::DetSet<SiStripDigi>    & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
-    clusterizeDetUnit_(digis,output);
-}
-void ThreeThresholdStripClusterizer::clusterizeDetUnit(const edmNew::DetSet<SiStripDigi> & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
-    clusterizeDetUnit_(digis,output);
+
+ThreeThresholdStripClusterizer::
+~ThreeThresholdStripClusterizer() {
+  delete info;
 }
 
-template<typename InputDetSet>
-void ThreeThresholdStripClusterizer::clusterizeDetUnit_(const InputDetSet& input,
-						        edmNew::DetSetVector<SiStripCluster>::FastFiller& output) {
-  
-#ifdef PATCH_FOR_DIGIS_DUPLICATION
-  bool printPatchError=false;
-  int countErrors=0;
-#endif
-  const uint32_t& detID = input.detId();
-  
-  if (!qualityHandle_->IsModuleUsable(detID)){
-#ifdef DEBUG_SiStripClusterizer_
-    LogDebug("SiStripClusterizer") << "[ThreeThresholdStripClusterizer::clusterizeDetUnit] detid " << detID << " skipped because flagged NOT Usable in SiStripQuality " << std::endl; 
-#endif
-    return;
+
+void ThreeThresholdStripClusterizer::
+init(const edm::EventSetup& es, std::string qualityLabel) {
+  uint32_t n_cache_id = es.get<SiStripNoisesRcd>().cacheIdentifier();
+  uint32_t g_cache_id = es.get<SiStripGainRcd>().cacheIdentifier();
+  uint32_t q_cache_id = es.get<SiStripQualityRcd>().cacheIdentifier();
+
+  if(n_cache_id != info->noise_cache_id) {
+    es.get<SiStripNoisesRcd>().get(info->noiseHandle);
+    info->noise_cache_id = n_cache_id;
   }
-  
-  typename InputDetSet::const_iterator begin=input.begin();
-  typename InputDetSet::const_iterator end  =input.end();
-  
-  typename InputDetSet::const_iterator ibeg, iend, ihigh, itest;  
-  ibeg = iend = begin;
-  cluster_digis_.clear();
-  cluster_digis_.reserve(10);
-
-  //output.data.reserve( (end - begin)/3 + 1); // FIXME put back in if needed
-
-  SiStripApvGain::Range detGainRange =  gainHandle_->getRange(detID); 
-  SiStripNoises::Range detNoiseRange = noiseHandle_->getRange(detID);
-  SiStripQuality::Range detQualityRange = qualityHandle_->getRange(detID);
-
-  //  AboveSeed predicate(seedThresholdInNoiseSigma(),SiStripNoiseService_,detID);
-  AboveSeed predicate(seedThresholdInNoiseSigma(), noiseHandle_, detNoiseRange, qualityHandle_, detQualityRange);
-
-#ifdef DEBUG_SiStripClusterizer_
-  std::stringstream ss;
-#endif
-
-  while ( ibeg != end &&
-          (ihigh = std::find_if( ibeg, end, predicate)) != end) {
-
-#ifdef DEBUG_SiStripClusterizer_
-    if(edm::isDebugEnabled())
-      ss << "\nSeed Channel:\n\t\t detID "<< detID << " digis " << ihigh->strip() 
-	 << " adc " << ihigh->adc() << " is " 
-	 << " channelNoise " << noiseHandle_->getNoise(ihigh->strip(),detNoiseRange) 
-	 <<  " IsBadChannel from SiStripQuality " << qualityHandle_->IsStripBad(detQualityRange,ihigh->strip());
-#endif
-    
-    // The seed strip is ihigh. Scan up and down from it, finding nearby strips above
-    // threshold, allowing for some holes. The accepted cluster runs from strip ibeg
-    // to iend, and itest is the strip under study, not yet accepted.
-    iend = ihigh;
-    itest = iend + 1;
-    while ( itest != end && (itest->strip() - iend->strip() <= max_holes_ + 1 )) {
-      float channelNoise = noiseHandle_->getNoise(itest->strip(),detNoiseRange);
-      bool IsBadChannel = qualityHandle_->IsStripBad(detQualityRange,itest->strip());
-
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\nStrips on the right:\n\t\t detID " << detID << " digis " << itest->strip()  
-	   << " adc " << itest->adc() << " " << " channelNoise " << channelNoise 
-	   <<  " IsBadChannel from SiStripQuality " << IsBadChannel;
-#endif 
-      
-      if (!IsBadChannel && itest->adc() >= static_cast<int>( channelThresholdInNoiseSigma() * channelNoise)) { 
-	iend = itest;
-      }
-      ++itest;
-    }
-    //if the next digi after iend is an adiacent bad digi then insert into candidate cluster
-    itest=iend+1;
-    if ( itest != end && (itest->strip() - iend->strip() == 1) && qualityHandle_->IsStripBad(detQualityRange,itest->strip()) ){
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\n\t\tInserted bad strip at the end edge iend->strip()= " << iend->strip() << " itest->strip() = " << itest->strip();
-#endif      
-      
-      iend++;
-    }
-
-    ibeg = ihigh;
-    itest = ibeg - 1;
-    while ( itest >= begin && (ibeg->strip() - itest->strip() <= max_holes_ + 1 )) {
-      float channelNoise = noiseHandle_->getNoise(itest->strip(),detNoiseRange);
-      bool IsBadChannel = qualityHandle_->IsStripBad(detQualityRange,itest->strip());
-
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\nStrips on the left:\n\t\t detID " << detID << " digis " << itest->strip()
-	   << " adc " << itest->adc() << " " << " channelNoise " << channelNoise 
-	   <<  " IsBadChannel from SiStripQuality " << IsBadChannel;
-#endif      
-      
-      
-      if (!IsBadChannel && itest->adc() >= static_cast<int>( channelThresholdInNoiseSigma() * channelNoise)) { 
-        ibeg = itest;
-      }
-      --itest;
-    }
-    //if the next digi after ibeg is an adiacent bad digi then insert into candidate cluster
-    itest=ibeg-1;
-    if ( itest >= begin && (ibeg->strip() - itest->strip() == 1) &&  qualityHandle_->IsStripBad(detQualityRange,itest->strip()) ) {    
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\nInserted bad strip at the begin edge ibeg->strip()= " << ibeg->strip() << " itest->strip() = " << itest->strip();
-#endif      
-      ibeg--;
-    }
-    
-    float charge = 0;
-    float sigmaNoise2=0;
-    //int counts=0;
-    cluster_digis_.clear();
-
-#ifdef PATCH_FOR_DIGIS_DUPLICATION
-    bool isDigiListBad=false;
-    int16_t oldStrip=-1;
-#endif
-
-    for (itest=ibeg; itest<=iend; itest++) {
-      float channelNoise = noiseHandle_->getNoise(itest->strip(),detNoiseRange);
-      bool IsBadChannel = qualityHandle_->IsStripBad(detQualityRange,itest->strip());
-
-#ifdef PATCH_FOR_DIGIS_DUPLICATION
-      if(itest->strip()==oldStrip){
-	isDigiListBad=true;
-	printPatchError=true;
-	countErrors++;
-	break;
-      }
-      oldStrip=itest->strip();
-#endif
-
-
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\nLooking at cluster digis:\n\t\t detID " << detID << " digis " << itest->strip()  
-	   << " adc " << itest->adc() << " channelNoise " << channelNoise 
-	   <<  " IsBadChannel from SiStripQuality " << IsBadChannel;
-#endif
-      
- 
-      //check for consecutive digis
-      if (itest!=ibeg && itest->strip()-(itest-1)->strip()!=1){
-	//digi *(itest-1) and *itest are not consecutive: create an equivalent number of Digis with zero amp
-	for (int j=(itest-1)->strip()+1;j<itest->strip();j++){
-	  cluster_digis_.push_back(SiStripDigi(j,0)); //if strip bad or under threshold set StripDigi.adc_=0  
-#ifdef DEBUG_SiStripClusterizer_
-	  ss << "\n\t\tHole added: detID " << detID << " digis " << j << " adc 0 ";
-#endif
-	}
-      }
-      if (!IsBadChannel && itest->adc() >= static_cast<int>( channelThresholdInNoiseSigma()*channelNoise)) {
-
-	float gainFactor  = gainHandle_->getStripGain(itest->strip(), detGainRange);
-
-	// Begin of Change done by Loic Quertenmont
-	// Protection if the Charge/Gain brings the charge to be bigger 
-	// than 255 (largest integer containable in uint8)
-        // Also, Gain is applied only if the strip is not saturating.
-	// Same convention as in SimTracker/SiStripDigitizer/src/SiTrivialDigitalConverter.cc
-
-        float stripCharge=(static_cast<float>(itest->adc()));
-
-// 	//dummy DEBUGG
-// 	float stripCharge;
-// 	for (uint16_t myadc=0; myadc<=255; myadc++){
-
-// 	  stripCharge=(static_cast<float>(myadc));
-
-// 	  gainFactor=0.73;
-// 	//ENDDEBUGG
-
-//correct for gain only non-truncated channel charge. Throw exception if channel charge exceeding 255 ADC counts is found
- 
-	  if(stripCharge<254){
-	    stripCharge /= gainFactor;	  
-	    
-	    if(stripCharge>511.5){stripCharge=255;}
-	    else if(stripCharge>253.5){stripCharge=254;}
-	  }  
-	  else if(stripCharge>255){
-	    throw cms::Exception("LogicError") << "Cluster charge (" << stripCharge << ") out of range. This clustering algorithm should only work with input charges lower than or equal to 255 ADC counts";
-
-	  }
-
-//  	//dummy DEBUGG
-// 	  std::vector<SiStripDigi> b; b.push_back(SiStripDigi(itest->strip(), static_cast<uint8_t>(stripCharge+0.5)));; 
-// 	  SiStripCluster c( detID, SiStripCluster::SiStripDigiRange( b.begin(),b.end()));
-// 	  edm::LogInfo("MYTEST") << "myadc="<<myadc<<" stripCharge="<<stripCharge<<" stored charge="<< (unsigned int)(c.amplitudes()[0])<< std::endl;
-//	  edm::LogInfo("MYTEST") << "myadc="<< (unsigned int)(static_cast<uint8_t>(255.5));
-// 	} 
-// 	  //ENDDEBUGG
-
-// End of Change done by Loic Quertenmont
-
-
-
-        charge += stripCharge;
-        sigmaNoise2 += channelNoise*channelNoise/(gainFactor*gainFactor);
-      
-	cluster_digis_.push_back(SiStripDigi(itest->strip(), static_cast<uint8_t>(stripCharge+0.5)));
-      } else {
-	cluster_digis_.push_back(SiStripDigi(itest->strip(),0)); //if strip bad or under threshold set SiStripDigi.adc_=0
-	
-#ifdef DEBUG_SiStripClusterizer_
-	 if(edm::isDebugEnabled())
-	   ss << "\n\t\tBad or under threshold digis: detID " << detID  << " digis " << itest->strip()  
-	      << " adc " << itest->adc() << " channelNoise " << channelNoise 
-	      <<  " IsBadChannel from SiStripQuality " << IsBadChannel;
-#endif
-      }
-    }
-    float sigmaNoise = sqrt(sigmaNoise2);
-    
-#ifdef PATCH_FOR_DIGIS_DUPLICATION
-    if (charge >= clusterThresholdInNoiseSigma()*sigmaNoise && !isDigiListBad) {
-#else
-    if (charge >= clusterThresholdInNoiseSigma()*sigmaNoise ) {
-#endif
-
-#ifdef DEBUG_SiStripClusterizer_
-       if(edm::isDebugEnabled())
-	 ss << "\n\t\tCluster accepted :)";
-#endif
-      output.push_back( SiStripCluster( detID, SiStripCluster::SiStripDigiRange( cluster_digis_.begin(),
-										      cluster_digis_.end())));
-    } else {
-#ifdef DEBUG_SiStripClusterizer_
-      if(edm::isDebugEnabled())
-	ss << "\n\t\tCluster rejected :(";
-#endif
-    }
-    ibeg = iend+1;
+  if(g_cache_id != info->gain_cache_id) {
+    es.get<SiStripGainRcd>().get(info->gainHandle);
+    info->gain_cache_id = g_cache_id;
   }
+  if(q_cache_id != info->quality_cache_id) {
+    es.get<SiStripQualityRcd>().get(qualityLabel,info->qualityHandle);
+    info->quality_cache_id = q_cache_id;
+  }
+}
 
-#ifdef PATCH_FOR_DIGIS_DUPLICATION
-  if(printPatchError)
-    edm::LogError("SiStripClusterizer") << "[ThreeThresholdStripClusterizer::clusterizeDetUnit] \n There are errors in " << countErrors << "  clusters due to not unique digis ";
-#endif
-
-#ifdef DEBUG_SiStripClusterizer_
-  LogDebug("SiStripClusterizer") << "[ThreeThresholdStripClusterizer::clusterizeDetUnit] \n" << ss.str();
-#endif
+inline 
+void ThreeThresholdStripClusterizer::
+ESinfo::setDetId(uint32_t id) {
+  gainRange =  gainHandle->getRange(id); 
+  noiseRange = noiseHandle->getRange(id);
+  qualityRange = qualityHandle->getRange(id);
 }
 
 
+template<class digiDetSet>
+inline
+void ThreeThresholdStripClusterizer::
+clusterizeDetUnit_(const digiDetSet & digis, output_t& output) {
+  if( !info->isModuleUsable( digis.detId() )) return;
+  info->setDetId( digis.detId() );
+  
+  typename digiDetSet::const_iterator   scan(digis.begin()), end(digis.end());
+  while( scan != end ) {
+    clearCandidate(); 
+    while( scan != end  && !candidateEnded( scan->strip() )  )   
+      addToCandidate(*scan++);
+    if( candidateAccepted() ) {
+      transform( ADCs.begin(), ADCs.end(), ADCs.begin(), applyGain(info, firstStrip()) );
+      appendBadNeighborsToCandidate();
+      output.push_back( SiStripCluster( digis.detId(), firstStrip(), ADCs.begin(), ADCs.end()) );
+    }
+  }
+}
+
+
+inline 
+bool ThreeThresholdStripClusterizer::
+candidateEnded(uint16_t testStrip) const {
+  uint16_t holes = testStrip - lastStrip - 1;
+  return ( !ADCs.empty() &&                         // a candidate exists, and
+	   holes > info->MaxSequentialHoles &&      // too many holes if not all are bad strips, and
+	   ( holes > info->MaxSequentialBad ||      // (too many bad strips anyway, or 
+	     !info->allBadBetween( lastStrip, testStrip ))); // not all holes are bad strips)
+}
+
+
+inline 
+void ThreeThresholdStripClusterizer::
+addToCandidate(const SiStripDigi& digi) { 
+  float noise = info->noise(digi.strip());
+  if( !info->bad(digi.strip())            && digi.adc() >= static_cast<uint16_t>( noise * info->ChannelThreshold)) {
+    if(!candidateHasSeed) candidateHasSeed = digi.adc() >= static_cast<uint16_t>( noise * info->SeedThreshold);
+    if( ADCs.empty() ) lastStrip = digi.strip() - 1; //begin candidate
+    while( ++lastStrip < digi.strip() ) ADCs.push_back(0); //pad holes
+    ADCs.push_back( digi.adc() );
+    noiseSquared += noise*noise;
+  }
+}
+
+
+inline 
+bool ThreeThresholdStripClusterizer::
+candidateAccepted() const {
+  return ( candidateHasSeed &&
+	   noiseSquared * info->ClusterThresholdSquared
+	   <=  std::pow( std::accumulate(ADCs.begin(),ADCs.end(),float(0)), 2));
+}
+
+
+inline 
+uint16_t ThreeThresholdStripClusterizer::
+applyGain::operator()(uint16_t adc) {
+  if(adc > 255) throw InvalidChargeException(SiStripDigi(adc,strip));
+  if(adc > 253) return adc; //saturated, do not scale
+  uint16_t charge = static_cast<uint16_t>( adc/info->gain(strip++) + 0.5 ); //adding 0.5 turns truncation into rounding
+  return  ( charge > 511 ? 255 : 
+	  ( charge > 253 ? 254 : charge ));
+}
+
+
+inline 
+void ThreeThresholdStripClusterizer::
+appendBadNeighborsToCandidate() {
+  uint8_t max = info->MaxAdjacentBad;
+  while(0 < max--) {
+    if(info->bad(firstStrip()-1)) { ADCs.insert( ADCs.begin(), 0);             }
+    if(info->bad( lastStrip + 1)) { ADCs.push_back(0);             lastStrip++;}
+  }
+}
+
+
+ThreeThresholdStripClusterizer::
+InvalidChargeException::InvalidChargeException(const SiStripDigi& digi)
+  : cms::Exception("Invalid Charge") {
+  std::stringstream s;
+  s << "Digi charge of " << digi.adc() << " ADC "
+    << "is out of range on strip " << digi.strip() << ".  "
+    << "The ThreeThresholdStripClusterizer algorithm only works "
+    << "with input charges less than 256 ADC counts." << std::endl;
+  this->append(s.str());
+}
+
+
+void ThreeThresholdStripClusterizer::
+clusterizeDetUnit(const edm::DetSet<SiStripDigi>& digis, output_t& output) {
+  clusterizeDetUnit_(digis,output);
+}
+
+void ThreeThresholdStripClusterizer::
+clusterizeDetUnit(const edmNew::DetSet<SiStripDigi>& digis, output_t& output) {
+  clusterizeDetUnit_(digis,output);
+}
