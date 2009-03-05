@@ -3,7 +3,14 @@ import FWCore.ParameterSet.Config as cms
 from RecoLocalTracker.SiStripClusterizer.test.ClusterizerUnitTestFunctions_cff import *
 
 ClusterizerDefaultGroup = ClusterizerTest( "Default Clusterizer Settings",
-                                           dict( channel=2, seed=3, cluster=5, hole=0, nBad=0, nAdj=1),
+                                           cms.PSet( Algorithm = cms.string("ThreeThresholdAlgorithm"),
+                                                     ChannelThreshold = cms.double(2),
+                                                     SeedThreshold    = cms.double(3),
+                                                     ClusterThreshold = cms.double(5),
+                                                     MaxSequentialHoles = cms.uint32(0),
+                                                     MaxSequentialBad   = cms.uint32(0),
+                                                     MaxAdjacentBad     = cms.uint32(1)
+                                                     ),
                                            [
     DetUnit( "[] = []",
              [  ],
@@ -165,11 +172,11 @@ ClusterizerDefaultGroup = ClusterizerTest( "Default Clusterizer Settings",
                digi(  128, 110,  noise1, 1.1, good) ],
              [ cluster(  127, [110, 100])
                ] ),
-    DetUnit( "Throws InvalidChargeException",
-             [ digi(  19, 256,   noise1, gain1, good) ],
-             [ 
-               ],
-             Invalid),
+#    DetUnit( "Throws InvalidChargeException",
+#             [ digi(  19, 256,   noise1, gain1, good) ],
+#             [ 
+#               ],
+#             Invalid),
     DetUnit( "Left edge",
              [ digi(  0, 100,   noise1, gain1, good),],
              [ cluster(0,[100])
@@ -208,7 +215,14 @@ ClusterizerDefaultGroup = ClusterizerTest( "Default Clusterizer Settings",
 
 
 ClusterizerProposedGroup = ClusterizerTest( "New Clusterizer Settings",
-                                            dict( channel=2, seed=3, cluster=5, hole=0, nBad=1, nAdj=1),
+                                            cms.PSet( Algorithm = cms.string("ThreeThresholdAlgorithm"),
+                                                      ChannelThreshold = cms.double(2),
+                                                      SeedThreshold    = cms.double(3),
+                                                      ClusterThreshold = cms.double(5),
+                                                      MaxSequentialHoles = cms.uint32(0),
+                                                      MaxSequentialBad   = cms.uint32(1),
+                                                      MaxAdjacentBad     = cms.uint32(1)
+                                                      ),
                                             [
     DetUnit( "(110/1)(100/1) = [110,100]",
              [ digi(  10, 110,  noise1, gain1, good),
