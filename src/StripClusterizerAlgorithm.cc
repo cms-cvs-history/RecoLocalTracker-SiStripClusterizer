@@ -57,7 +57,5 @@ InvalidChargeException::InvalidChargeException(const SiStripDigi& digi)
   std::stringstream s;
   s << "Digi charge of " << digi.adc() << " ADC "
     << "is out of range on strip " << digi.strip() << ".  "
-    << "The ThreeThresholdStripClusterizer algorithm only works "
-    << "with input charges less than 256 ADC counts." << std::endl;
   this->append(s.str());
 }
