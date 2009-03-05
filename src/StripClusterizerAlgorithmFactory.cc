@@ -3,6 +3,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "RecoLocalTracker/SiStripClusterizer/interface/StripClusterizerAlgorithm.h"
 #include "RecoLocalTracker/SiStripClusterizer/interface/ThreeThresholdAlgorithm.h"
+#include "RecoLocalTracker/SiStripClusterizer/interface/OldAlgorithm.h"
 
 std::auto_ptr<StripClusterizerAlgorithm> StripClusterizerAlgorithmFactory::
 create(const edm::ParameterSet& conf) {
@@ -17,6 +18,15 @@ create(const edm::ParameterSet& conf) {
 	       conf.getParameter<unsigned>("MaxSequentialHoles"),
 	       conf.getParameter<unsigned>("MaxSequentialBad"),
 	       conf.getParameter<unsigned>("MaxAdjacentBad") ));
+  }
+
+  if(algorithm == "OldAlgorithm") {
+    return std::auto_ptr<StripClusterizerAlgorithm>(
+	   new OldAlgorithm(
+	       conf.getParameter<double>("ChannelThreshold"),
+	       conf.getParameter<double>("SeedThreshold"),
+	       conf.getParameter<double>("ClusterThreshold"),
+	       conf.getParameter<unsigned>("MaxSequentialHoles") ));
   }
 
   throw cms::Exception("[StripClusterizerAlgorithmFactory] Unregistered Algorithm")
