@@ -56,6 +56,6 @@ InvalidChargeException::InvalidChargeException(const SiStripDigi& digi)
   : cms::Exception("Invalid Charge") {
   std::stringstream s;
   s << "Digi charge of " << digi.adc() << " ADC "
-    << "is out of range on strip " << digi.strip() << ".  "
+    << "is out of range on strip " << digi.strip() << ".  ";
   this->append(s.str());
 }
