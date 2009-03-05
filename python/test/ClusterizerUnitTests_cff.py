@@ -172,11 +172,11 @@ ClusterizerDefaultGroup = ClusterizerTest( "Default Clusterizer Settings",
                digi(  128, 110,  noise1, 1.1, good) ],
              [ cluster(  127, [110, 100])
                ] ),
-#    DetUnit( "Throws InvalidChargeException",
-#             [ digi(  19, 256,   noise1, gain1, good) ],
-#             [ 
-#               ],
-#             Invalid),
+    DetUnit( "Throws InvalidChargeException",
+             [ digi(  19, 256,   noise1, gain1, good) ],
+             [ 
+               ],
+             Invalid),
     DetUnit( "Left edge",
              [ digi(  0, 100,   noise1, gain1, good),],
              [ cluster(0,[100])
