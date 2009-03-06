@@ -34,10 +34,10 @@ produce(edm::Event& event, const edm::EventSetup& es)  {
   algorithm->initialize(es);  
   if( findInput(inputOld, event) ) algorithm->clusterize(*inputOld, *output); else 
     if( findInput(inputNew, event) ) algorithm->clusterize(*inputNew, *output); else
-      edm::LogError("[SiStripClusterizer] Input Not Found");
+      edm::LogError("Input Not Found");
 
-  edm::LogInfo("[SiStripClusterizer] Product: ") << output->dataSize() << " clusters from " 
-						 << output->size()     << " detector modules";
+  edm::LogInfo("Output") << output->dataSize() << " clusters from " 
+			 << output->size()     << " modules";
   event.put(output);
 }
 
@@ -51,7 +51,7 @@ findInput(edm::Handle<T>& handle, const edm::Event& e) {
 
     e.getByLabel(*inputTag, handle);
     if( handle.isValid() && !handle->empty() ) {
-      edm::LogInfo("[SiStripClusterizer] Input from ") << *inputTag;
+      edm::LogInfo("Input") << *inputTag;
       return true;
     }
   }
