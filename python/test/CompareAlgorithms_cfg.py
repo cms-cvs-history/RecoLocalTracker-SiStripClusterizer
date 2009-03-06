@@ -21,7 +21,7 @@ process.load('Configuration/StandardSequences/RawToDigi_cff')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
     '/store/relval/CMSSW_3_1_0_pre2/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG/IDEAL_30X_v1/0000/023BACD4-8103-DE11-A2E6-001617C3B6CE.root'))
-#---------------------------------------------------------------------------
+
 
 # Configuration which varies depending on what to compare
 process.NewClusterizer = cms.EDProducer("SiStripClusterizer",
