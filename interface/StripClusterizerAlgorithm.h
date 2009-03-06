@@ -16,7 +16,7 @@ class StripClusterizerAlgorithm {
  public:
 
   virtual ~StripClusterizerAlgorithm() {}
-  virtual void initialize(const edm::EventSetup&, const std::string& qualityLabel = "");
+  virtual void initialize(const edm::EventSetup&);
 
   //Offline DetSet interface
   typedef edmNew::DetSetVector<SiStripCluster> output_t;
@@ -34,7 +34,7 @@ class StripClusterizerAlgorithm {
 
  protected:
 
-  StripClusterizerAlgorithm() : noise_cache_id(0), gain_cache_id(0), quality_cache_id(0) {}
+  StripClusterizerAlgorithm() : qualityLabel(""), noise_cache_id(0), gain_cache_id(0), quality_cache_id(0) {}
 
   uint32_t currentId() {return detId;}
   virtual void setDetId(const uint32_t);
@@ -43,7 +43,8 @@ class StripClusterizerAlgorithm {
   bool bad(const uint16_t& strip)    const { return qualityHandle->IsStripBad( qualityRange, strip ); }
   bool isModuleUsable(const uint32_t& id)  const { return qualityHandle->IsModuleUsable( id ); }
   bool allBadBetween(uint16_t L, const uint16_t& R) const { while( ++L < R  &&  bad(L) ); return L == R; }
-  
+  std::string qualityLabel;
+
  private:
 
   template<class T> void clusterize_(const T&, output_t&);

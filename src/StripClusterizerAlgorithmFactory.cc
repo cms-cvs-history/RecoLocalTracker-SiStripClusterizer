@@ -17,7 +17,8 @@ create(const edm::ParameterSet& conf) {
 	       conf.getParameter<double>("ClusterThreshold"),
 	       conf.getParameter<unsigned>("MaxSequentialHoles"),
 	       conf.getParameter<unsigned>("MaxSequentialBad"),
-	       conf.getParameter<unsigned>("MaxAdjacentBad") ));
+	       conf.getParameter<unsigned>("MaxAdjacentBad"),
+	       conf.getParameter<std::string>("QualityLabel") ));
   }
 
   if(algorithm == "OldAlgorithm") {
@@ -26,7 +27,8 @@ create(const edm::ParameterSet& conf) {
 	       conf.getParameter<double>("ChannelThreshold"),
 	       conf.getParameter<double>("SeedThreshold"),
 	       conf.getParameter<double>("ClusterThreshold"),
-	       conf.getParameter<unsigned>("MaxSequentialHoles") ));
+	       conf.getParameter<unsigned>("MaxSequentialHoles"),
+	       conf.getParameter<std::string>("QualityLabel") ));
   }
 
   throw cms::Exception("[StripClusterizerAlgorithmFactory] Unregistered Algorithm")

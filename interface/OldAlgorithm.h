@@ -35,7 +35,7 @@ class OldAlgorithm : public StripClusterizerAlgorithm {
   void clusterizeDetUnit(const edm::DetSet<SiStripDigi>    & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output);
   void clusterizeDetUnit(const edmNew::DetSet<SiStripDigi> & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output);
 
-  void initialize(const edm::EventSetup&, const std::string& qualityLabel = "" );
+  void initialize(const edm::EventSetup&);
 
   bool stripByStripBegin(uint32_t id) {return false;}
   void stripByStripAdd(uint16_t strip, uint16_t adc, std::vector<SiStripCluster>& out) {}
@@ -47,7 +47,7 @@ class OldAlgorithm : public StripClusterizerAlgorithm {
 
  private:
 
-  OldAlgorithm(float strip_thr, float seed_thr,float clust_thr, int max_holes,std::string qualityLabel="") :
+  OldAlgorithm(float strip_thr, float seed_thr,float clust_thr, int max_holes,std::string qualityLabel) :
     theChannelThreshold(strip_thr), 
     theSeedThreshold(seed_thr),
     theClusterThreshold(clust_thr),

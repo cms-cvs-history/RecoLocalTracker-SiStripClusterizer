@@ -5,9 +5,10 @@
 #include <numeric>
 
 ThreeThresholdAlgorithm::
-ThreeThresholdAlgorithm(float chan, float seed, float cluster, unsigned holes, unsigned bad, unsigned adj) 
+ThreeThresholdAlgorithm(float chan, float seed, float cluster, unsigned holes, unsigned bad, unsigned adj, std::string qL) 
   : ChannelThreshold( chan ), SeedThreshold( seed ), ClusterThresholdSquared( cluster*cluster ),
     MaxSequentialHoles( holes ), MaxSequentialBad( bad ), MaxAdjacentBad( adj ) {
+  qualityLabel = (qL);
   ADCs.reserve(128);
 }
 

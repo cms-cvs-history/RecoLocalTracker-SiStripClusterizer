@@ -4,7 +4,7 @@
 
 #define PATCH_FOR_DIGIS_DUPLICATION
 
-void OldAlgorithm::initialize(const edm::EventSetup& es, const std::string& qualityLabel) {
+void OldAlgorithm::initialize(const edm::EventSetup& es) {
   //Get ESObject 
   es.get<SiStripGainRcd>().get(gainHandle_);
   es.get<SiStripNoisesRcd>().get(noiseHandle_);

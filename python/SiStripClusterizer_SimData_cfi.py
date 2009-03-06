@@ -9,5 +9,6 @@ siStripClusters = cms.EDFilter("SiStripClusterizer",
                                ClusterThreshold = cms.double(5.0),
                                MaxSequentialHoles = cms.uint32(0),
                                MaxSequentialBad = cms.uint32(1),
-                               MaxAdjacentBad = cms.uint32(0)
+                               MaxAdjacentBad = cms.uint32(0),
+                               QualityLabel = cms.string("")
                                )

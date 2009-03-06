@@ -214,7 +214,8 @@ OldAlgorithmPre31 = ClusterizerTest( "Default Clusterizer Settings",
                                                ChannelThreshold = cms.double(2),
                                                SeedThreshold    = cms.double(3),
                                                ClusterThreshold = cms.double(5),
-                                               MaxSequentialHoles = cms.uint32(0)
+                                               MaxSequentialHoles = cms.uint32(0),
+                                               QualityLabel = cms.string("")
                                                ),
                                      Pre31Tests
                                      )
@@ -226,7 +227,8 @@ EmmulatePre31 = ClusterizerTest( "Default Clusterizer Settings",
                                            ClusterThreshold = cms.double(5),
                                            MaxSequentialHoles = cms.uint32(0),
                                            MaxSequentialBad   = cms.uint32(0),
-                                           MaxAdjacentBad     = cms.uint32(1)
+                                           MaxAdjacentBad     = cms.uint32(1),
+                                           QualityLabel = cms.string("")
                                            ),
                                  Pre31Tests
                                  )
@@ -238,7 +240,8 @@ Post31 = ClusterizerTest( "Proposed Clusterizer Settings",
                                     ClusterThreshold = cms.double(5),
                                     MaxSequentialHoles = cms.uint32(0),
                                     MaxSequentialBad   = cms.uint32(1),
-                                    MaxAdjacentBad     = cms.uint32(0)
+                                    MaxAdjacentBad     = cms.uint32(0),
+                                    QualityLabel = cms.string("")
                                     ),
                           [
     DetUnit( "(110/1)(100/1) = [110,100]",

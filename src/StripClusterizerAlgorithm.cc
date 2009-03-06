@@ -9,7 +9,7 @@
 #include <string>
 
 void StripClusterizerAlgorithm::
-initialize(const edm::EventSetup& es, const std::string& qualityLabel) {
+initialize(const edm::EventSetup& es) {
   uint32_t n_cache_id = es.get<SiStripNoisesRcd>().cacheIdentifier();
   uint32_t g_cache_id = es.get<SiStripGainRcd>().cacheIdentifier();
   uint32_t q_cache_id = es.get<SiStripQualityRcd>().cacheIdentifier();
