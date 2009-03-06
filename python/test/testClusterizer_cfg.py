@@ -26,9 +26,8 @@ process.load("RecoLocalTracker.SiStripClusterizer.test.ClusterizerUnitTests_cff"
 testDefinition = cms.VPSet() + [ process.OldAlgorithmPre31,
                                  process.EmmulatePre31,
                                  process.Post31 ]
-process.es           = cms.ESProducer("ClusterizerUnitTesterESProducer",
-                                      ClusterizerTestGroups = testDefinition   )
-process.runUnitTests = cms.EDAnalyzer("ClusterizerUnitTester",
-                                      ClusterizerTestGroups = testDefinition  )
+
+process.es           = cms.ESProducer("ClusterizerUnitTesterESProducer", ClusterizerTestGroups = testDefinition  )
+process.runUnitTests = cms.EDAnalyzer("ClusterizerUnitTester",           ClusterizerTestGroups = testDefinition  )
 
 process.path = cms.Path( process.runUnitTests )
