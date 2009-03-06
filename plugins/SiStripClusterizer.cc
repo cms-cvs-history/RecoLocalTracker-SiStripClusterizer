@@ -26,7 +26,7 @@ void SiStripClusterizer::
 produce(edm::Event& event, const edm::EventSetup& es)  {
 
   std::auto_ptr< edmNew::DetSetVector<SiStripCluster> > output(new edmNew::DetSetVector<SiStripCluster>());
-  output->reserve(10000,4*10000); //(moduleIDs,clusters) FIXME: should be optimized considering expected occupancy
+  output->reserve(10000,4*10000);
 
   edm::Handle< edm::DetSetVector<SiStripDigi> >     inputOld;  
   edm::Handle< edmNew::DetSetVector<SiStripDigi> >  inputNew;  
