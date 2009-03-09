@@ -25,7 +25,7 @@
 #include "RecoLocalTracker/SiStripClusterizer/interface/StripClusterizerAlgorithm.h"
 class StripClusterizerAlgorithmFactory;
 
-class OldAlgorithm : public StripClusterizerAlgorithm {
+class OldThreeThresholdAlgorithm : public StripClusterizerAlgorithm {
 
   friend class StripClusterizerAlgorithmFactory;
 
@@ -47,7 +47,7 @@ class OldAlgorithm : public StripClusterizerAlgorithm {
 
  private:
 
-  OldAlgorithm(float strip_thr, float seed_thr,float clust_thr, int max_holes,std::string qualityLabel) :
+  OldThreeThresholdAlgorithm(float strip_thr, float seed_thr,float clust_thr, int max_holes,std::string qualityLabel) :
     theChannelThreshold(strip_thr), 
     theSeedThreshold(seed_thr),
     theClusterThreshold(clust_thr),

@@ -3,7 +3,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "RecoLocalTracker/SiStripClusterizer/interface/StripClusterizerAlgorithm.h"
 #include "RecoLocalTracker/SiStripClusterizer/interface/ThreeThresholdAlgorithm.h"
-#include "RecoLocalTracker/SiStripClusterizer/interface/OldAlgorithm.h"
+#include "RecoLocalTracker/SiStripClusterizer/interface/OldThreeThresholdAlgorithm.h"
 
 std::auto_ptr<StripClusterizerAlgorithm> StripClusterizerAlgorithmFactory::
 create(const edm::ParameterSet& conf) {
@@ -21,9 +21,9 @@ create(const edm::ParameterSet& conf) {
 	       conf.getParameter<std::string>("QualityLabel") ));
   }
 
-  if(algorithm == "OldAlgorithm") {
+  if(algorithm == "OldThreeThresholdAlgorithm") {
     return std::auto_ptr<StripClusterizerAlgorithm>(
-	   new OldAlgorithm(
+	   new OldThreeThresholdAlgorithm(
 	       conf.getParameter<double>("ChannelThreshold"),
 	       conf.getParameter<double>("SeedThreshold"),
 	       conf.getParameter<double>("ClusterThreshold"),

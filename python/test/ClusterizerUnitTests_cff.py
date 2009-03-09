@@ -210,7 +210,7 @@ Pre31Tests =                                            [
 
 
 OldAlgorithmPre31 = ClusterizerTest( "Default Clusterizer Settings",
-                                     cms.PSet( Algorithm = cms.string("OldAlgorithm"),
+                                     cms.PSet( Algorithm = cms.string("OldThreeThresholdAlgorithm"),
                                                ChannelThreshold = cms.double(2),
                                                SeedThreshold    = cms.double(3),
                                                ClusterThreshold = cms.double(5),

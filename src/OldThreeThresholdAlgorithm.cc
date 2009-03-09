@@ -1,25 +1,25 @@
-#include "RecoLocalTracker/SiStripClusterizer/interface/OldAlgorithm.h"
+#include "RecoLocalTracker/SiStripClusterizer/interface/OldThreeThresholdAlgorithm.h"
 #include "sstream"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #define PATCH_FOR_DIGIS_DUPLICATION
 
-void OldAlgorithm::initialize(const edm::EventSetup& es) {
+void OldThreeThresholdAlgorithm::initialize(const edm::EventSetup& es) {
   //Get ESObject 
   es.get<SiStripGainRcd>().get(gainHandle_);
   es.get<SiStripNoisesRcd>().get(noiseHandle_);
   es.get<SiStripQualityRcd>().get(qualityLabel_,qualityHandle_);
 }
 
-void OldAlgorithm::clusterizeDetUnit(const edm::DetSet<SiStripDigi>    & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
+void OldThreeThresholdAlgorithm::clusterizeDetUnit(const edm::DetSet<SiStripDigi>    & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
   clusterizeDetUnit_(digis,output);
 }
-void OldAlgorithm::clusterizeDetUnit(const edmNew::DetSet<SiStripDigi> & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
+void OldThreeThresholdAlgorithm::clusterizeDetUnit(const edmNew::DetSet<SiStripDigi> & digis, edmNew::DetSetVector<SiStripCluster>::FastFiller & output) {
   clusterizeDetUnit_(digis,output);
 }
 
 template<typename InputDetSet>
-void OldAlgorithm::clusterizeDetUnit_(const InputDetSet& input,
+void OldThreeThresholdAlgorithm::clusterizeDetUnit_(const InputDetSet& input,
 							edmNew::DetSetVector<SiStripCluster>::FastFiller& output) {
   
 #ifdef PATCH_FOR_DIGIS_DUPLICATION
@@ -30,7 +30,7 @@ void OldAlgorithm::clusterizeDetUnit_(const InputDetSet& input,
   
   if (!qualityHandle_->IsModuleUsable(detID)){
 #ifdef DEBUG_SiStripClusterizer_
-    LogDebug("SiStripClusterizer") << "[OldAlgorithm::clusterizeDetUnit] detid " << detID << " skipped because flagged NOT Usable in SiStripQuality " << std::endl; 
+    LogDebug("SiStripClusterizer") << "[OldThreeThresholdAlgorithm::clusterizeDetUnit] detid " << detID << " skipped because flagged NOT Usable in SiStripQuality " << std::endl; 
 #endif
     return;
   }
@@ -256,11 +256,11 @@ void OldAlgorithm::clusterizeDetUnit_(const InputDetSet& input,
 
 #ifdef PATCH_FOR_DIGIS_DUPLICATION
     if(printPatchError)
-      edm::LogError("SiStripClusterizer") << "[OldAlgorithm::clusterizeDetUnit] \n There are errors in " << countErrors << "  clusters due to not unique digis ";
+      edm::LogError("SiStripClusterizer") << "[OldThreeThresholdAlgorithm::clusterizeDetUnit] \n There are errors in " << countErrors << "  clusters due to not unique digis ";
 #endif
 
 #ifdef DEBUG_SiStripClusterizer_
-    LogDebug("SiStripClusterizer") << "[OldAlgorithm::clusterizeDetUnit] \n" << ss.str();
+    LogDebug("SiStripClusterizer") << "[OldThreeThresholdAlgorithm::clusterizeDetUnit] \n" << ss.str();
 #endif
   }
 

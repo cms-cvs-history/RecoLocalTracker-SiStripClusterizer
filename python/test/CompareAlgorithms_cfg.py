@@ -40,7 +40,7 @@ process.NewClusterizer = cms.EDProducer("SiStripClusterizer",
     cms.InputTag('siStripZeroSuppression','ScopeMode'))
                                         )
 process.OldClusterizer = cms.EDProducer("SiStripClusterizer",
-                                        Algorithm = cms.string("OldAlgorithm"),
+                                        Algorithm = cms.string("OldThreeThresholdAlgorithm"),
                                         ChannelThreshold = cms.double(2),
                                         SeedThreshold    = cms.double(3),
                                         ClusterThreshold = cms.double(5),
