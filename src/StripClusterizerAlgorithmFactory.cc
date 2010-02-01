@@ -18,7 +18,8 @@ create(const edm::ParameterSet& conf) {
 	       conf.getParameter<unsigned>("MaxSequentialHoles"),
 	       conf.getParameter<unsigned>("MaxSequentialBad"),
 	       conf.getParameter<unsigned>("MaxAdjacentBad"),
-	       conf.getParameter<std::string>("QualityLabel") ));
+	       conf.getParameter<std::string>("QualityLabel"),
+	       conf.getParameter<bool>("RemoveApvShots")));
   }
 
   if(algorithm == "OldThreeThresholdAlgorithm") {

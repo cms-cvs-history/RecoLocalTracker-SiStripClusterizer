@@ -5,9 +5,9 @@
 #include <numeric>
 
 ThreeThresholdAlgorithm::
-ThreeThresholdAlgorithm(float chan, float seed, float cluster, unsigned holes, unsigned bad, unsigned adj, std::string qL) 
+ThreeThresholdAlgorithm(float chan, float seed, float cluster, unsigned holes, unsigned bad, unsigned adj, std::string qL, bool removeApvShots) 
   : ChannelThreshold( chan ), SeedThreshold( seed ), ClusterThresholdSquared( cluster*cluster ),
-    MaxSequentialHoles( holes ), MaxSequentialBad( bad ), MaxAdjacentBad( adj ) {
+    MaxSequentialHoles( holes ), MaxSequentialBad( bad ), MaxAdjacentBad( adj ), RemoveApvShots(removeApvShots) {
   qualityLabel = (qL);
   ADCs.reserve(128);
 }
@@ -22,6 +22,9 @@ clusterizeDetUnit_(const digiDetSet& digis, output_t::FastFiller& output) {
   typename digiDetSet::const_iterator  
     scan( digis.begin() ), 
     end(  digis.end() );
+
+  if(RemoveApvShots)
+    ApvCleaner.clean(digis,scan,end);
 
   clearCandidate();
   while( scan != end ) {
@@ -85,7 +88,7 @@ applyGains() {
     if(*adc > 253) return; //saturated, do not scale
     uint16_t charge = static_cast<uint16_t>( *adc/gain(strip++) + 0.5 ); //adding 0.5 turns truncation into rounding
     *adc = ( charge > 1022 ? 255 : 
-           ( charge >  253 ? 254 : charge ));
+	     ( charge >  253 ? 254 : charge ));
   }
 }
 
