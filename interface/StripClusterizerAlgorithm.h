@@ -44,10 +44,18 @@ class StripClusterizerAlgorithm {
   bool isModuleUsable(const uint32_t& id)  const { return qualityHandle->IsModuleUsable( id ); }
   bool allBadBetween(uint16_t L, const uint16_t& R) const { while( ++L < R  &&  bad(L) ); return L == R; }
   std::string qualityLabel;
+  bool _setDetId;
 
  private:
 
-  template<class T> void clusterize_(const T&, output_t&);
+  template<class T> void clusterize_(const T& input, output_t& output) {
+    for(typename T::const_iterator it = input.begin(); it!=input.end(); it++) {
+      output_t::FastFiller ff(output, it->detId());	
+      clusterizeDetUnit(*it, ff);	
+      if(ff.empty()) ff.abort();	
+    }	
+  }
+
 
   SiStripApvGain::Range gainRange;
   SiStripNoises::Range  noiseRange;
@@ -56,6 +64,7 @@ class StripClusterizerAlgorithm {
   edm::ESHandle<SiStripNoises> noiseHandle;
   edm::ESHandle<SiStripQuality> qualityHandle;
   uint32_t noise_cache_id, gain_cache_id, quality_cache_id, detId;
+
 
 };
 #endif
